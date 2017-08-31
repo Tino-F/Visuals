@@ -38,8 +38,8 @@ audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 		}
 	}, 10);
 }, ( xhr ) => {
-	let perc = Math.floor(xhr.loaded / xhr.total * 100) + '%';
-	let loaded = 'Loading: ' + perc;
+	let perc = (xhr.loaded / xhr.total * 100) + '%';
+	let loaded = 'Loading: ' + Math.floor(perc);
 	progress.style.width = perc;
 	loading.innerHTML = loaded;
 }, ( xhr ) => {
