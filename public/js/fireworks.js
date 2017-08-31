@@ -7,7 +7,7 @@ let up = 0,
 let s_group = new THREE.Group();
 let title = document.getElementById('title');
 let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 7000 );
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000 );
 camera.position.z = -1300;
 let renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
@@ -19,7 +19,7 @@ camera.add( listener );
 let sound = new THREE.Audio( listener );
 let audioLoader = new THREE.AudioLoader();
 
-audioLoader.load( 'music/Fake.wav', function( buffer ) {
+audioLoader.load( 'music/sad.mp3', function( buffer ) {
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
 	sound.setVolume(1);
@@ -77,7 +77,6 @@ function nukeit () {
 };
 
 function unnukeit () {
-	let tweens = [];
 	for ( let i = 0; i < sparks.length; i++ ) {
 		let tween = new TWEEN.Tween(sparks[i].position).to({x: 0, y: 0, z: 0}, 2000).easing(TWEEN.Easing.Exponential.In).onComplete(() => { nuked = false });
 		tween.start();
@@ -101,13 +100,13 @@ function get_color (pct) {
             break;
         }
     }
-    var lower = percentColors[i - 1];
-    var upper = percentColors[i];
-    var range = upper.pct - lower.pct;
-    var rangePct = (pct - lower.pct) / range;
-    var pctLower = 1 - rangePct;
-    var pctUpper = rangePct;
-    var color = {
+    let lower = percentColors[i - 1];
+    let upper = percentColors[i];
+    let range = upper.pct - lower.pct;
+    let rangePct = (pct - lower.pct) / range;
+    let pctLower = 1 - rangePct;
+    let pctUpper = rangePct;
+    let color = {
         r: Math.floor(lower.color.r * pctLower + upper.color.r * pctUpper),
         g: Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper),
         b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
@@ -177,7 +176,7 @@ document.addEventListener('keyup', ( e ) => {
 })
 
 function animate () {
-	camera.position.z += up + down;
+	camera.position.z += up + down + 0.1;
 	camera.position.x += left + right;
   controls.update();
   TWEEN.update();
