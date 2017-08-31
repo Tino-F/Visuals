@@ -6,6 +6,7 @@ let up = 0,
 	right = 0;
 let s_group = new THREE.Group();
 let title = document.getElementById('title');
+let loading = document.getElementById('loading');
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000 );
 camera.position.z = -1300;
@@ -19,7 +20,7 @@ camera.add( listener );
 let sound = new THREE.Audio( listener );
 let audioLoader = new THREE.AudioLoader();
 
-audioLoader.load( 'music/sad.mp3', function( buffer ) {
+audioLoader.load( 'music/sad.mp3', ( buffer ) => {
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
 	sound.setVolume(1);
@@ -35,7 +36,11 @@ audioLoader.load( 'music/sad.mp3', function( buffer ) {
 			clearInterval( fade_int );
 		}
 	}, 10);
-});
+}, ( xhr ) => {
+	let loaded = (xhr.loaded / xhr.total * 100) + '%';
+	loading.innerHTML = loaded;
+}
+);
 
 let analyser = new THREE.AudioAnalyser( sound, 32 );
 document.body.append( renderer.domElement );
