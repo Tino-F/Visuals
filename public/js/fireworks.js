@@ -7,6 +7,7 @@ let up = 0,
 let s_group = new THREE.Group();
 let title = document.getElementById('title');
 let loading = document.getElementById('loading');
+let progress = document.getElementById('progress');
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000 );
 camera.position.z = -1300;
@@ -37,8 +38,12 @@ audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 		}
 	}, 10);
 }, ( xhr ) => {
-	let loaded = 'Loading: ' + (xhr.loaded / xhr.total * 100) + '%';
+	let perc = Math.floor(xhr.loaded / xhr.total * 100) + '%';
+	let loaded = 'Loading: ' + perc;
+	progress.style.width = perc;
 	loading.innerHTML = loaded;
+}, ( xhr ) => {
+	loading.innerHTML = '<span style="color: red;">An error has occured.</span>';
 }
 );
 

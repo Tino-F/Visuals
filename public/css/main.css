@@ -16,16 +16,28 @@ canvas {
   opacity: 1;
   color: white;
   font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
-  height: 250px;
+  height: 350px;
   width: 50%;
   margin: 0 25% 0 25%;
   border: 1px solid white;
   text-align: center;
-  top: 35vh;
+  top: calc(50vh - 175px);
 }
 
 #title p {
   text-align: center;
   color: white;
   font-family: sans-serif;
+}
+
+#loading_bar {
+  width: 90%;
+  height: 20px;
+  margin-left: 5%;
+  border: 1px solid white;
+}
+
+#progress {
+  background: white;
+  height: 100%;
 }
