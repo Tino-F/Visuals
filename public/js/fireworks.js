@@ -20,14 +20,14 @@ camera.add( listener );
 let sound = new THREE.Audio( listener );
 let audioLoader = new THREE.AudioLoader();
 
-audioLoader.load( 'music/sad.mp3', ( buffer ) => {
+audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
 	sound.setVolume(1);
   title.style.opacity = 1;
   let fade_int = setInterval(() => {
 		if ( title.style.opacity >= 0 ) {
-			title.style.opacity -= 0.02;
+			title.style.opacity -= 0.05;
 		} else {
 			nukeit();
 			sound.play();
@@ -37,7 +37,7 @@ audioLoader.load( 'music/sad.mp3', ( buffer ) => {
 		}
 	}, 10);
 }, ( xhr ) => {
-	let loaded = (xhr.loaded / xhr.total * 100) + '%';
+	let loaded = 'Loading: ' + (xhr.loaded / xhr.total * 100) + '%';
 	loading.innerHTML = loaded;
 }
 );
@@ -198,6 +198,12 @@ renderer.domElement.onclick = () => {
     nukeit();
   }
 };
+
+window.addEventListener('resize', function () {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
 
 grab_lighter(4000);
 animate();
