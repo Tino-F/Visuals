@@ -21,7 +21,9 @@ camera.add( listener );
 let sound = new THREE.Audio( listener );
 let audioLoader = new THREE.AudioLoader();
 
-audioLoader.load( 'music/Fake.wav', ( buffer ) => {
+//sad.mp3 touch.mp3 Fake.wav
+
+audioLoader.load( 'music/sad.mp3', ( buffer ) => {
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
 	sound.setVolume(1);
@@ -38,9 +40,9 @@ audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 		}
 	}, 10);
 }, ( xhr ) => {
-	let perc = (xhr.loaded / xhr.total * 100) + '%';
-	let loaded = 'Loading: ' + Math.floor(perc);
-	progress.style.width = perc;
+	let perc = (xhr.loaded / xhr.total * 100);
+	let loaded = 'Loading: ' + Math.floor(perc) + '%';
+	progress.style.width = ( (perc * 10) / 10 ) + '%';
 	loading.innerHTML = loaded;
 }, ( xhr ) => {
 	loading.innerHTML = '<span style="color: red;">An error has occured.</span>';
