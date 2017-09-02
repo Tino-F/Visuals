@@ -272,8 +272,8 @@ window.addEventListener('resize', function () {
 
 create_fractal(900, ( i ) => {
 
-	//return {x: (Math.sin(i*6) * i), y: (3/150-i) + 1000, z: (Math.cos( 5 * i) * i)}
-	return {x: (Math.cos( 5 * i) * i), y: (Math.sin(i*6) * i), z: (3/150-i)}
+	return {x: (Math.sin(i*6) * i), y: (3/150-i) + 600, z: (Math.cos( 5 * i) * i)}
+	//return {x: (Math.cos( 5 * i) * i), y: (Math.sin(i*6) * i), z: (3/150-i)}
 
 });
 animate();
