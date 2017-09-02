@@ -4,12 +4,14 @@ let up = 0,
 	down = 0,
 	left = 0,
 	right = 0;
+let color_groups = [];
 let s_group = new THREE.Group();
+let main_group = new THREE.Group();
 let title = document.getElementById('title');
 let loading = document.getElementById('loading');
 let progress = document.getElementById('progress');
 let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000 );
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 4000 );
 camera.position.z = -1300;
 let renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
@@ -23,7 +25,7 @@ let audioLoader = new THREE.AudioLoader();
 
 //sad.mp3 touch.mp3 Fake.wav
 
-audioLoader.load( 'music/sad.mp3', ( buffer ) => {
+audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
 	sound.setVolume(1);
@@ -63,22 +65,75 @@ function random ( min, max, sign ) {
 
 };
 
-function grab_lighter ( n ) {
-	let m = new THREE.SpriteMaterial({color: 0xffffff});
-	blown = [];
+function sort_colors ( mats, average, interval ) {
 
-	for( let i = 0; i < n; i++ ) {
-		let s = new THREE.Sprite( m );
-		s.scale.set( 5, 5, 5 );
-		s.position.set( 0, 0, 0 );
-		sparks.push( s );
-		s_group.add( s );
-		blown.push({x: random( 0, window.innerWidth*2, true ), y: random( 0, window.innerHeight*2, true ), z: random( 0, 3000, true )});
+	let group;
+
+	if ( Math.floor( interval/average )  > 15) {
+		group = 15;
+	} else {
+		group = Math.floor( interval / average );
 	}
 
-  scene.add( s_group );
+	let the_sprite = new THREE.Sprite( mats[group] );
+	the_sprite.scale.set( 5, 5, 5 );
+	the_sprite.position.set( 0, 0, 0 );
+	color_groups[ group ].add( the_sprite );
+	sparks.push( the_sprite );
+
+}
+
+function create_fractal ( n, cb ) {
+
+	//The callback is meant to take a numerical argument and return a json variable as the 3d position of the sprite as such:
+	//{x: 0, y: 0, z: 0}
+
+	color_groups = [];
+	let sprite_materials = [];
+
+	for ( let i = 0; i < 16; i++ ) {
+		let group = new THREE.Group();
+		group.name = i;
+		color_groups.push( new THREE.Group() );
+		sprite_materials.push( new THREE.SpriteMaterial({color: 0xffffff}) );
+	}
+
+	blown = [];
+	sparks = [];
+	let group_average = (n - (n % 16)) / 16;
+
+	for ( let i = 0; i < n; i++ ) {
+
+		if ( !cb ) {
+
+			//if no formula, put the sprites in random places
+			blown.push({x: random( 0, window.innerWidth*2, true ), y: random( 0, window.innerHeight*2, true ), z: random( 0, 3000, true )});
+
+		} else {
+
+			blown.push( cb(i) );
+
+		}
+
+		sort_colors( sprite_materials, group_average, i );
+
+	}
+
+	for ( let i = 0; i < color_groups.length; i++ ) {
+		scene.add( color_groups[i] );
+	}
+
+	blown.reverse();
 
 };
+
+function update_color () {
+	spectrum = analyser.getFrequencyData();
+	console.log( spectrum );
+	for (let i = 0; i < color_groups.length; i++) {
+		color_groups[i].children[0].material.color.setHex( get_color( spectrum[i] / 255 ) );
+	}
+}
 
 function nukeit () {
 	let tweens = [];
@@ -96,8 +151,10 @@ function unnukeit () {
 };
 
 var percentColors = [
-	{ pct: 0, color: { r: 0x00, g: 0xff, b: 0xff } },
-  { pct: 0.5, color: { r: 0x00, g: 0x00, b: 0xff } },
+	{ pct: 0, color: { r: 0x50, g: 0xf4, b: 0x42 } },
+	{ pct: 0.2, color: { r: 0xf4, g: 0xf4, b: 0x42 } },
+	{ pct: 0.4, color: { r: 0x00, g: 0xff, b: 0xff } },
+  { pct: 0.7, color: { r: 0x00, g: 0x00, b: 0xff } },
   { pct: 1, color: { r: 0xff, g: 0x00, b: 0x00 } }
 ];
 
@@ -192,9 +249,10 @@ function animate () {
 	camera.position.x += left + right;
   controls.update();
   TWEEN.update();
-  s_group.children[0].material.color.setHex( three_freq(7) );
-  console.log( analyser.getFrequencyData()[7] );
-  renderer.render( scene, camera );
+  //s_group.children[0].material.color.setHex( three_freq(7) );
+  //console.log( analyser.getFrequencyData()[7] );
+	update_color();
+	renderer.render( scene, camera );
   requestAnimationFrame( animate );
 };
 
@@ -212,5 +270,11 @@ window.addEventListener('resize', function () {
   camera.updateProjectionMatrix();
 });
 
-grab_lighter(4000);
+create_fractal(900, ( i ) => {
+
+	//return {x: (Math.sin(i*6) * i), y: (3/150-i) + 1000, z: (Math.cos( 5 * i) * i)}
+	return {x: (Math.cos( 5 * i) * i), y: (Math.sin(i*6) * i), z: (3/150-i)}
+
+});
 animate();
+update_color();
