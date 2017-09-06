@@ -12,7 +12,8 @@ let loading = document.getElementById('loading');
 let progress = document.getElementById('progress');
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 4000 );
-camera.position.z = -1300;
+camera.position.z = -100;
+camera.position.y = 0;
 let renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
@@ -34,7 +35,8 @@ audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 		if ( title.style.opacity >= 0 ) {
 			title.style.opacity -= 0.05;
 		} else {
-			nukeit();
+			//nukeit();
+			first.explode();
 			sound.play();
 			title.remove();
 			//setTimeout(() => {nukeit()}, 100);
@@ -65,6 +67,120 @@ function random ( min, max, sign ) {
 
 };
 
+class attractor {
+	color( pct ) {
+		for (var i = 1; i < this.colors.length - 1; i++) {
+        if (pct < this.colors[i].pct) {
+            break;
+        }
+    }
+    let lower = this.colors[i - 1];
+    let upper = this.colors[i];
+    let range = upper.pct - lower.pct;
+    let rangePct = (pct - lower.pct) / range;
+    let pctLower = 1 - rangePct;
+    let pctUpper = rangePct;
+    let color = {
+        r: Math.floor(lower.color.r * pctLower + upper.color.r * pctUpper),
+        g: Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper),
+        b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
+    };
+    return '0x' + componentToHex(color.r) + componentToHex(color.g) + componentToHex(color.b);
+	}
+
+	draw () {
+		let dx = (this.a * ( this.y - this.x )) * this.t;
+		let dy = (this.x * ( this.b - this.z ) - this.y) * this.t;
+		let dz = (this.x * this.y - this.c * this.z) * this.t;
+		this.x = this.x + dx;
+		this.y = this.y + dy;
+		this.z = this.z + dz;
+		return {x: this.x, y: this.y, z: this.z};
+	}
+
+	update () {
+		let spectrum = analyser.getFrequencyData();
+		for (let i = 0; i < this.color_groups.length; i++) {
+			this.color_groups[i].children[0].material.color.setHex( this.color( spectrum[i] / 255 ) );
+		}
+	}
+
+	explode ( time ) {
+		if ( this.nuked == false ) {
+			for ( let i = 0; i < this.sparks.length; i++ ) {
+				let tween = new TWEEN.Tween(this.sparks[i].position).to(this.blown[i], time).easing(TWEEN.Easing.Exponential.Out).onComplete(() => { this.nuked = true });
+				tween.start();
+			}
+		}
+	}
+
+	implode ( time ) {
+		if ( this.nuked == true ) {
+			for ( let i = 0; i < this.sparks.length; i++ ) {
+				let tween = new TWEEN.Tween(this.sparks[i].position).to(this.origin, time).easing(TWEEN.Easing.Exponential.Out).onComplete(() => { this.nuked = false });
+				tween.start();
+			}
+		}
+	}
+
+	constructor ( vars, origin, colors, n ) {
+		//{a: 1, b: 1, c: 1, t: 1}
+		this.a = vars.a;
+		this.b = vars.b;
+		this.c = vars.c;
+		this.colors = colors;
+		this.t = vars.t;
+		this.dt = vars.t;
+		this.origin = {x: origin.x, y: origin.y, z: origin.z};
+		this.x = 1;
+		this.y = 1;
+		this.z = 1;
+		this.color_groups = [];
+		this.sprite_materials = [];
+		this.blown = [];
+		this.sparks = [];
+		this.lorenz_attractor = new THREE.Group();
+		this.nuked = false;
+		let average = (n - (n % 16)) / 16;
+
+		for ( let i = 0; i < 16; i++ ) {
+			let group = new THREE.Group();
+			this.color_groups.push( group );
+			this.sprite_materials.push( new THREE.SpriteMaterial({color: 0xffffff}) );
+		}
+
+
+		for (let i = 0; i < n; i++) {
+
+			let coordinates = this.draw();
+			let group;
+			this.blown.push( coordinates );
+
+			if ( Math.floor( i / average )  > 15) {
+				group = 15;
+			} else {
+				group = Math.floor( i / average );
+			}
+
+			let sprite = new THREE.Sprite( this.sprite_materials[group] );
+			sprite.scale.set( 1, 1, 1 );
+			sprite.position.x = origin.x;
+			sprite.position.y = origin.y;
+			sprite.position.z = origin.z;
+			this.color_groups[group].add( sprite );
+			this.sparks.push( sprite );
+
+		}
+
+		for ( let i = 0; i < this.color_groups.length; i++ ) {
+			scene.add( this.color_groups[i] );
+		}
+
+		this.blown.reverse();
+
+	}
+};
+
 function sort_colors ( mats, average, interval ) {
 
 	let group;
@@ -76,7 +192,7 @@ function sort_colors ( mats, average, interval ) {
 	}
 
 	let the_sprite = new THREE.Sprite( mats[group] );
-	the_sprite.scale.set( 5, 5, 5 );
+	the_sprite.scale.set( 1, 1, 1 );
 	the_sprite.position.set( 0, 0, 0 );
 	color_groups[ group ].add( the_sprite );
 	sparks.push( the_sprite );
@@ -129,7 +245,6 @@ function create_fractal ( n, cb ) {
 
 function update_color () {
 	spectrum = analyser.getFrequencyData();
-	console.log( spectrum );
 	for (let i = 0; i < color_groups.length; i++) {
 		color_groups[i].children[0].material.color.setHex( get_color( spectrum[i] / 255 ) );
 	}
@@ -187,18 +302,8 @@ function get_color (pct) {
 function three_average () {
 	let num = Math.floor( analyser.getAverageFrequency() * 100 );
 
-	/*
-	if ( num > 10000 ) {
-		num = 10000;
-	}
-	*/
-
 	return get_color( num / 10000 );
 
-};
-
-function three_freq ( x ) {
-	return get_color( analyser.getFrequencyData()[x] / 255 );
 };
 
 document.addEventListener('keydown', ( e ) => {
@@ -244,12 +349,20 @@ document.addEventListener('keyup', ( e ) => {
 
 })
 
+//41f4c4
+
+let first = new attractor({a: 27, b:37, c: 3.5, t: 0.01}, {x: 0.9, y: 0, z: 0}, [
+	{ pct: 0, color: { r: 0x41, g: 0xf4, b: 0xc4 } },
+	{ pct: 0.5, color: { r: 0x4e, g: 0x42, b: 0xf4 } },
+  { pct: 1, color: { r: 0xe5, g: 0x42, b: 0xf4 } }
+], 200);
+
 function animate () {
-	camera.position.z += up + down + 0.1;
+	camera.position.z += up + down;
 	camera.position.x += left + right;
   controls.update();
+	first.update();
   TWEEN.update();
-  //s_group.children[0].material.color.setHex( three_freq(7) );
   //console.log( analyser.getFrequencyData()[7] );
 	update_color();
 	renderer.render( scene, camera );
@@ -270,11 +383,17 @@ window.addEventListener('resize', function () {
   camera.updateProjectionMatrix();
 });
 
-create_fractal(900, ( i ) => {
+/*
+create_fractal(3000, ( i ) => {
 
-	//return {x: (Math.sin(i*6) * i), y: (3/150-i) + 1000, z: (Math.cos( 5 * i) * i)}
-	return {x: (Math.cos( 5 * i) * i), y: (Math.sin(i*6) * i), z: (3/150-i)}
+	//i = i * 0.7;
+	//return {x: (Math.sin(i*6) * i), y: (3/150-i) + 600, z: (Math.cos( 5 * i) * i)}
+	return first.draw();
+	//return {x: (Math.cos( 5 * i) * i), y: (Math.sin(i*6) * i), z: (3/150-i)}
+	//return {x: Math.cos( 5 * i), y: i, z: i}
 
 });
+*/
+
 animate();
 update_color();
