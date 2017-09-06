@@ -12,12 +12,15 @@ let loading = document.getElementById('loading');
 let progress = document.getElementById('progress');
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 4000 );
-camera.position.z = -100;
-camera.position.y = 0;
+camera.position.x = -175.1;
+camera.position.y = 76.7;
+camera.position.z = 90;
 let renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setClearColor( 0x000000 );
+let stats = new Stats();
+document.body.append( stats.dom )
 let controls = new THREE.TrackballControls( camera );
 let listener = new THREE.AudioListener();
 camera.add( listener );
@@ -67,7 +70,7 @@ function random ( min, max, sign ) {
 
 };
 
-class attractor {
+class lorenzAttractor {
 	color( pct ) {
 		for (var i = 1; i < this.colors.length - 1; i++) {
         if (pct < this.colors[i].pct) {
@@ -95,7 +98,7 @@ class attractor {
 		this.x = this.x + dx;
 		this.y = this.y + dy;
 		this.z = this.z + dz;
-		return {x: this.x, y: this.y, z: this.z};
+		return {x: this.x + this.origin.x, y: this.y + this.origin.y, z: this.z + this.origin.z};
 	}
 
 	update () {
@@ -351,30 +354,24 @@ document.addEventListener('keyup', ( e ) => {
 
 //41f4c4
 
-let first = new attractor({a: 27, b:37, c: 3.5, t: 0.01}, {x: 0.9, y: 0, z: 0}, [
+let first = new lorenzAttractor({a: 20, b:120, c: 5, t: 0.0047}, {x: -60, y: 0, z: -100}, [
 	{ pct: 0, color: { r: 0x41, g: 0xf4, b: 0xc4 } },
 	{ pct: 0.5, color: { r: 0x4e, g: 0x42, b: 0xf4 } },
   { pct: 1, color: { r: 0xe5, g: 0x42, b: 0xf4 } }
-], 200);
+], 1200);
 
 function animate () {
 	camera.position.z += up + down;
 	camera.position.x += left + right;
+	camera.rotation.x += 0.1;
   controls.update();
 	first.update();
   TWEEN.update();
+	stats.update();
   //console.log( analyser.getFrequencyData()[7] );
 	update_color();
 	renderer.render( scene, camera );
   requestAnimationFrame( animate );
-};
-
-renderer.domElement.onclick = () => {
-  if ( nuked ) {
-    unnukeit();
-  } else {
-    nukeit();
-  }
 };
 
 window.addEventListener('resize', function () {
