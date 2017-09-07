@@ -11,10 +11,17 @@ let title = document.getElementById('title');
 let loading = document.getElementById('loading');
 let progress = document.getElementById('progress');
 let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 4000 );
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 20000 );
+let light = new THREE.AmbientLight(0xffffff, 1);
+light.position.y = 20000
+scene.add( light );
+//scene.fog = new THREE.Fog( 0xa6aebc, 0.1, 20000 );
+
+/*
 camera.position.x = -175.1;
 camera.position.y = 76.7;
-camera.position.z = 90;
+*/
+camera.position.z = 15000;
 let renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
@@ -179,6 +186,7 @@ class explodingLorenzAttractor {
 
 		for ( let i = 0; i < this.color_groups.length; i++ ) {
 			scene.add( this.color_groups[i] );
+			console.log( this.color_groups[i] );
 		}
 
 		this.blown.reverse();
@@ -220,7 +228,10 @@ class LorenzAttractor {
 	update () {
 		let spectrum = analyser.getFrequencyData();
 		for (let i = 0; i < this.point_materials.length; i++) {
-			this.point_materials[i].color.setHex( this.color( spectrum[i] / 255 ) );
+			let color = this.color( spectrum[i] / 255 );
+			this.point_materials[i].color.setHex( color );
+			this.point_materials[i].emissive.setHex( color );
+			this.point_materials[i].emissiveIntensity = spectrum[i] / 255;
 		}
 	}
 
@@ -245,7 +256,7 @@ class LorenzAttractor {
 		for ( let i = 0; i < 16; i++ ) {
 			let shape = new THREE.Geometry();
 			this.point_shapes.push( shape );
-			this.point_materials.push( new THREE.PointsMaterial({color: 0xffffff}) );
+			this.point_materials.push( new THREE.MeshPhongMaterial({color: 0xffffff}) );
 		}
 
 		for (let i = 0; i < n; i++) {
@@ -270,6 +281,7 @@ class LorenzAttractor {
 
 		for ( let i = 0; i < this.point_shapes.length; i++ ) {
 			let points = new THREE.Points( this.point_shapes[i], this.point_materials[i] );
+			points.overdraw = true;
 			scene.add( points );
 		}
 
@@ -446,13 +458,16 @@ document.addEventListener('keyup', ( e ) => {
 
 //41f4c4
 
-let first = new LorenzAttractor({a: 20, b:120, c: 5, t: 0.0047}, {x: -80, y: 0, z: -100}, [
+let mx = 1.8;
+
+let first = new LorenzAttractor({a: 512 * mx, b:3072 * mx, c: 128 * mx, t: 0.00009}, {x: -80, y: 0, z: -100}, [
 	{ pct: 0, color: { r: 0x41, g: 0xf4, b: 0xc4 } },
 	{ pct: 0.5, color: { r: 0x4e, g: 0x42, b: 0xf4 } },
   { pct: 1, color: { r: 0xe5, g: 0x42, b: 0xf4 } }
-], 10000);
+], 50000);
 
 function animate () {
+	//light.intensity = analyser.getFrequencyData()[3] / 255;
 	camera.position.z += up + down;
 	camera.position.x += left + right;
 	camera.rotation.x += 0.1;
