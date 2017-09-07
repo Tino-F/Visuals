@@ -38,11 +38,8 @@ audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 		if ( title.style.opacity >= 0 ) {
 			title.style.opacity -= 0.05;
 		} else {
-			//nukeit();
-			first.explode();
 			sound.play();
 			title.remove();
-			//setTimeout(() => {nukeit()}, 100);
 			clearInterval( fade_int );
 		}
 	}, 10);
@@ -70,7 +67,7 @@ function random ( min, max, sign ) {
 
 };
 
-class lorenzAttractor {
+class explodingLorenzAttractor {
 	color( pct ) {
 		for (var i = 1; i < this.colors.length - 1; i++) {
         if (pct < this.colors[i].pct) {
@@ -144,12 +141,18 @@ class lorenzAttractor {
 		this.sparks = [];
 		this.lorenz_attractor = new THREE.Group();
 		this.nuked = false;
+		let pointGeometry = new THREE.Geometry();
+		let apoint = new THREE.Vector3();
+		apoint.x = 0;
+		apoint.y = 0;
+		apoint.z = 0;
+		pointGeometry.vertices.push( apoint );
 		let average = (n - (n % 16)) / 16;
 
 		for ( let i = 0; i < 16; i++ ) {
 			let group = new THREE.Group();
 			this.color_groups.push( group );
-			this.sprite_materials.push( new THREE.SpriteMaterial({color: 0xffffff}) );
+			this.sprite_materials.push( new THREE.PointsMaterial({color: 0xffffff}) );
 		}
 
 
@@ -165,8 +168,7 @@ class lorenzAttractor {
 				group = Math.floor( i / average );
 			}
 
-			let sprite = new THREE.Sprite( this.sprite_materials[group] );
-			sprite.scale.set( 1, 1, 1 );
+			let sprite = new THREE.Points( pointGeometry, this.sprite_materials[group] );
 			sprite.position.x = origin.x;
 			sprite.position.y = origin.y;
 			sprite.position.z = origin.z;
@@ -180,6 +182,96 @@ class lorenzAttractor {
 		}
 
 		this.blown.reverse();
+
+	}
+};
+
+class LorenzAttractor {
+	color( pct ) {
+		for (var i = 1; i < this.colors.length - 1; i++) {
+        if (pct < this.colors[i].pct) {
+            break;
+        }
+    }
+    let lower = this.colors[i - 1];
+    let upper = this.colors[i];
+    let range = upper.pct - lower.pct;
+    let rangePct = (pct - lower.pct) / range;
+    let pctLower = 1 - rangePct;
+    let pctUpper = rangePct;
+    let color = {
+        r: Math.floor(lower.color.r * pctLower + upper.color.r * pctUpper),
+        g: Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper),
+        b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
+    };
+    return '0x' + componentToHex(color.r) + componentToHex(color.g) + componentToHex(color.b);
+	}
+
+	draw () {
+		let dx = (this.a * ( this.y - this.x )) * this.t;
+		let dy = (this.x * ( this.b - this.z ) - this.y) * this.t;
+		let dz = (this.x * this.y - this.c * this.z) * this.t;
+		this.x = this.x + dx;
+		this.y = this.y + dy;
+		this.z = this.z + dz;
+		return {x: this.x + this.origin.x, y: this.y + this.origin.y, z: this.z + this.origin.z};
+	}
+
+	update () {
+		let spectrum = analyser.getFrequencyData();
+		for (let i = 0; i < this.point_materials.length; i++) {
+			this.point_materials[i].color.setHex( this.color( spectrum[i] / 255 ) );
+		}
+	}
+
+	constructor ( vars, origin, colors, n ) {
+		//{a: 1, b: 1, c: 1, t: 1}
+		this.a = vars.a;
+		this.b = vars.b;
+		this.c = vars.c;
+		this.colors = colors;
+		this.t = vars.t;
+		this.dt = vars.t;
+		this.origin = {x: origin.x, y: origin.y, z: origin.z};
+		this.x = 1;
+		this.y = 1;
+		this.z = 1;
+		this.point_shapes = [];
+		this.point_materials = [];
+		this.lorenz_attractor = new THREE.Group();
+		this.nuked = false;
+		let average = (n - (n % 16)) / 16;
+
+		for ( let i = 0; i < 16; i++ ) {
+			let shape = new THREE.Geometry();
+			this.point_shapes.push( shape );
+			this.point_materials.push( new THREE.PointsMaterial({color: 0xffffff}) );
+		}
+
+		for (let i = 0; i < n; i++) {
+
+			let coordinates = this.draw();
+			let group;
+
+			let point = new THREE.Vector3();
+			point.x = coordinates.x;
+			point.y = coordinates.y;
+			point.z = coordinates.z;
+
+			if ( Math.floor( i / average )  > 15) {
+				group = 15;
+			} else {
+				group = Math.floor( i / average );
+			}
+
+			this.point_shapes[ group ].vertices.push( point );
+
+		}
+
+		for ( let i = 0; i < this.point_shapes.length; i++ ) {
+			let points = new THREE.Points( this.point_shapes[i], this.point_materials[i] );
+			scene.add( points );
+		}
 
 	}
 };
@@ -354,11 +446,11 @@ document.addEventListener('keyup', ( e ) => {
 
 //41f4c4
 
-let first = new lorenzAttractor({a: 20, b:120, c: 5, t: 0.0047}, {x: -60, y: 0, z: -100}, [
+let first = new LorenzAttractor({a: 20, b:120, c: 5, t: 0.0047}, {x: -80, y: 0, z: -100}, [
 	{ pct: 0, color: { r: 0x41, g: 0xf4, b: 0xc4 } },
 	{ pct: 0.5, color: { r: 0x4e, g: 0x42, b: 0xf4 } },
   { pct: 1, color: { r: 0xe5, g: 0x42, b: 0xf4 } }
-], 1200);
+], 10000);
 
 function animate () {
 	camera.position.z += up + down;
