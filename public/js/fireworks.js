@@ -76,11 +76,13 @@ function random ( min, max, sign ) {
 
 class explodingLorenzAttractor {
 	color( pct ) {
+
 		for (var i = 1; i < this.colors.length - 1; i++) {
-        if (pct < this.colors[i].pct) {
-            break;
-        }
+      if (pct < this.colors[i].pct) {
+        break;
+      }
     }
+
     let lower = this.colors[i - 1];
     let upper = this.colors[i];
     let range = upper.pct - lower.pct;
@@ -470,13 +472,13 @@ function animate () {
 	//light.intensity = analyser.getFrequencyData()[3] / 255;
 	camera.position.z += up + down;
 	camera.position.x += left + right;
-	camera.rotation.x += 0.1;
+	//camera.rotation.x += 0.1;
   controls.update();
 	first.update();
   TWEEN.update();
 	stats.update();
   //console.log( analyser.getFrequencyData()[7] );
-	update_color();
+	//update_color();
 	renderer.render( scene, camera );
   requestAnimationFrame( animate );
 };
