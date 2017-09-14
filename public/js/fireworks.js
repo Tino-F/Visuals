@@ -11,7 +11,7 @@ let title = document.getElementById('title');
 let loading = document.getElementById('loading');
 let progress = document.getElementById('progress');
 let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 200000 );
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 200000 );
 let light = new THREE.PointLight(0xffffff, 0.5);
 let sky = new THREE.Sky();
 scene.add( sky.mesh );
@@ -658,10 +658,10 @@ let second = new HalvorsenAttractor({b: 0.208186, t: 1.5}, {x: 1000, y: 222, z: 
 		{ pct: 0.5, color: { r: 0x41, g: 0xf4, b: 0x68 } },
   	{ pct: 1, color: { r: 0x41, g: 0xdf, b: 0xf4 } }
 	],
-	20000,
-	20000);
+	30000,
+	40000);
 
-let g = new THREE.BoxBufferGeometry( 100, 100, 100 );
+let g = new THREE.CubeGeometry( 100, 100, 100 );
 let m = new THREE.MeshNormalMaterial(/*{color: 0x290a5b}*/);
 let box = new THREE.Mesh( g, m );
 scene.add( box );
@@ -674,6 +674,9 @@ function animate () {
   controls.update();
 	box.rotation.x += 0.003;
 	box.rotation.y += 0.003;
+	box.scale.x = analyser.getAverageFrequency() / 100;
+	box.scale.y = analyser.getAverageFrequency() / 100;
+	box.scale.z = analyser.getAverageFrequency() / 100;
 	first.update();
 	second.update();
   TWEEN.update();
@@ -691,20 +694,4 @@ window.addEventListener('resize', function () {
   camera.updateProjectionMatrix();
 });
 
-
-/*
-create_fractal(3000, ( i ) => {
-
-	return {x: (Math.sin(i*6) * i), y: (3/150-i) + 600, z: (Math.cos( 5 * i) * i)}
-	//return {x: (Math.cos( 5 * i) * i), y: (Math.sin(i*6) * i), z: (3/150-i)};
-	//i = i * 0.7;
-	//return {x: (Math.sin(i*6) * i), y: (3/150-i) + 600, z: (Math.cos( 5 * i) * i)}
-	//return first.draw();
-	//return {x: (Math.cos( 5 * i) * i), y: (Math.sin(i*6) * i), z: (3/150-i)}
-	//return {x: Math.cos( 5 * i), y: i, z: i};
-
-});
-*/
-
 animate();
-update_color();
