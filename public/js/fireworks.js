@@ -668,8 +668,8 @@ scene.add( box );
 
 function animate () {
 	//light.intensity = analyser.getFrequencyData()[3] / 255;
-	camera.position.z += up + down;
-	camera.position.x += left + right;
+	camera.position.z -= 2 + up + down;
+	camera.position.x += 1 + left + right;
 	//camera.rotation.x += 0.1;
   controls.update();
 	box.rotation.x += 0.003;
