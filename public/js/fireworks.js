@@ -11,21 +11,19 @@ let title = document.getElementById('title');
 let loading = document.getElementById('loading');
 let progress = document.getElementById('progress');
 let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 20000 );
-let light = new THREE.AmbientLight(0xffffff, 1);
-light.position.y = 20000
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 200000 );
+let light = new THREE.PointLight(0xffffff, 0.5);
+let sky = new THREE.Sky();
+scene.add( sky.mesh );
+light.position.y = 5000
 scene.add( light );
-//scene.fog = new THREE.Fog( 0xa6aebc, 0.1, 20000 );
-
-/*
-camera.position.x = -175.1;
-camera.position.y = 76.7;
-*/
+scene.add( new THREE.AmbientLight(0xffffff, 0.5) );
 camera.position.z = 15000;
 let renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setClearColor( 0x000000 );
+renderer.autoclear = false;
 let stats = new Stats();
 document.body.append( stats.dom )
 let controls = new THREE.TrackballControls( camera );
@@ -34,9 +32,9 @@ camera.add( listener );
 let sound = new THREE.Audio( listener );
 let audioLoader = new THREE.AudioLoader();
 
-//sad.mp3 touch.mp3 Fake.wav
+//sad.mp3 touch.mp3 Fake.wav woah.mp3
 
-audioLoader.load( 'music/Fake.wav', ( buffer ) => {
+audioLoader.load( 'music/woah.mp3', ( buffer ) => {
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
 	sound.setVolume(1);
@@ -196,6 +194,87 @@ class explodingLorenzAttractor {
 	}
 };
 
+class Fractal {
+  color( pct ) {
+    for (var i = 1; i < this.colors.length - 1; i++) {
+        if (pct < this.colors[i].pct) {
+            break;
+        }
+    }
+    let lower = this.colors[i - 1];
+    let upper = this.colors[i];
+    let range = upper.pct - lower.pct;
+    let rangePct = (pct - lower.pct) / range;
+    let pctLower = 1 - rangePct;
+    let pctUpper = rangePct;
+    let color = {
+        r: Math.floor(lower.color.r * pctLower + upper.color.r * pctUpper),
+        g: Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper),
+        b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
+    };
+    return '0x' + componentToHex(color.r) + componentToHex(color.g) + componentToHex(color.b);
+  }
+
+  update () {
+    let spectrum = analyser.getFrequencyData();
+    for (let i = 0; i < this.point_materials.length; i++) {
+      let color = this.color( spectrum[i] / 255 );
+      this.point_materials[i].color.setHex( color );
+      this.point_materials[i].emissive.setHex( color );
+      this.point_materials[i].emissiveIntensity = spectrum[i] / 255;
+    }
+  }
+
+  constructor ( formula, origin, colors, n ) {
+    this.colors = colors;
+    this.origin = {x: origin.x, y: origin.y, z: origin.z};
+    this.point_shapes = [];
+    this.point_materials = [];
+    this.fractal = new THREE.Group();
+    this.nuked = false;
+    let average = (n - (n % 16)) / 16;
+
+    for ( let i = 0; i < 16; i++ ) {
+      let shape = new THREE.Geometry();
+      this.point_shapes[i] = shape ;
+      this.point_materials[i] = new THREE.MeshPhongMaterial();
+    }
+
+    for (let i = 0; i < n; i++) {
+
+      let coordinates = formula( i );
+      let group;
+
+      let point = new THREE.Vector3();
+      point.x = coordinates.x + origin.x;
+      point.y = coordinates.y + origin.y;
+      point.z = coordinates.z + origin.z;
+
+      if ( Math.floor( i / average )  > 15) {
+        group = 15;
+      } else {
+        group = Math.floor( i / average );
+      }
+
+      this.point_shapes[ group ].vertices.push( point );
+
+    }
+
+    for ( let i = 0; i < this.point_shapes.length; i++ ) {
+      /*
+      console.log( i + '.', this.point_shapes[i] );
+      console.log( i + '.', this.point_materials[i] );
+      */
+      let points = new THREE.Points( this.point_shapes[i], this.point_materials[i] );
+      console.log( points );
+      this.fractal.add( points );
+    }
+
+    scene.add( this.fractal );
+
+  }
+};
+
 class LorenzAttractor {
 	color( pct ) {
 		for (var i = 1; i < this.colors.length - 1; i++) {
@@ -257,8 +336,8 @@ class LorenzAttractor {
 
 		for ( let i = 0; i < 16; i++ ) {
 			let shape = new THREE.Geometry();
-			this.point_shapes.push( shape );
-			this.point_materials.push( new THREE.MeshPhongMaterial({color: 0xffffff}) );
+			this.point_shapes[i] = shape ;
+			this.point_materials[i] = new THREE.MeshPhongMaterial();
 		}
 
 		for (let i = 0; i < n; i++) {
@@ -282,10 +361,114 @@ class LorenzAttractor {
 		}
 
 		for ( let i = 0; i < this.point_shapes.length; i++ ) {
+			/*
+			console.log( i + '.', this.point_shapes[i] );
+			console.log( i + '.', this.point_materials[i] );
+			*/
 			let points = new THREE.Points( this.point_shapes[i], this.point_materials[i] );
-			points.overdraw = true;
+			console.log( points );
 			scene.add( points );
 		}
+
+		console.log( this.point_materials[0] );
+
+	}
+};
+
+class HalvorsenAttractor {
+	color( pct ) {
+		for (var i = 1; i < this.colors.length - 1; i++) {
+        if (pct < this.colors[i].pct) {
+            break;
+        }
+    }
+    let lower = this.colors[i - 1];
+    let upper = this.colors[i];
+    let range = upper.pct - lower.pct;
+    let rangePct = (pct - lower.pct) / range;
+    let pctLower = 1 - rangePct;
+    let pctUpper = rangePct;
+    let color = {
+        r: Math.floor(lower.color.r * pctLower + upper.color.r * pctUpper),
+        g: Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper),
+        b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
+    };
+    return '0x' + componentToHex(color.r) + componentToHex(color.g) + componentToHex(color.b);
+	}
+
+	draw () {
+		let dx = ( Math.sin( this.y ) - ( this.b * this.x ) ) * this.t;
+		let dy = ( Math.sin( this.z ) - ( this.b * this.y ) ) * this.t;
+		let dz = ( Math.sin( this.x ) - ( this.b * this.z ) ) * this.t;
+		this.x = this.x + dx;
+		this.y = this.y + dy;
+		this.z = this.z + dz;
+		return {x: (this.x * this.m) + this.placement.x, y: (this.y * this.m) + this.placement.y, z: (this.z * this.m) + this.placement.z};
+	}
+
+	update () {
+		let spectrum = analyser.getFrequencyData();
+		for (let i = 0; i < this.point_materials.length; i++) {
+			let color = this.color( spectrum[i] / 255 );
+			this.point_materials[i].color.setHex( color );
+			this.point_materials[i].emissive.setHex( color );
+			this.point_materials[i].emissiveIntensity = spectrum[i] / 255;
+		}
+	}
+
+	constructor ( vars, origin, placement, colors, m, n ) {
+    //{b: b < 1, t: 1}
+		this.colors = colors;
+		this.m = m;
+		this.placement = placement;
+    this.b = vars.b;
+		this.t = vars.t;
+		this.x = origin.x;
+		this.y = origin.y;
+		this.z = origin.z;
+		this.point_shapes = [];
+		this.point_materials = [];
+		this.halvorsen_attractor = new THREE.Group();
+		this.nuked = false;
+		let average = (n - (n % 16)) / 16;
+
+		for ( let i = 0; i < 16; i++ ) {
+			let shape = new THREE.Geometry();
+			this.point_shapes[i] = shape ;
+			this.point_materials[i] = new THREE.MeshPhongMaterial();
+		}
+
+		for (let i = 0; i < n; i++) {
+
+			let coordinates = this.draw();
+			let group;
+
+			let point = new THREE.Vector3();
+			point.x = coordinates.x;
+			point.y = coordinates.y;
+			point.z = coordinates.z;
+
+			if ( Math.floor( i / average )  > 15) {
+				group = 15;
+			} else {
+				group = Math.floor( i / average );
+			}
+
+			this.point_shapes[ group ].vertices.push( point );
+
+		}
+
+		for ( let i = 0; i < this.point_shapes.length; i++ ) {
+			/*
+			console.log( i + '.', this.point_shapes[i] );
+			console.log( i + '.', this.point_materials[i] );
+			*/
+			let points = new THREE.Points( this.point_shapes[i], this.point_materials[i] );
+			console.log( points );
+			this.halvorsen_attractor.add( points );
+		}
+
+		scene.add( this.halvorsen_attractor );
 
 	}
 };
@@ -468,18 +651,37 @@ let first = new LorenzAttractor({a: 512 * mx, b:3072 * mx, c: 128 * mx, t: 0.000
   { pct: 1, color: { r: 0xe5, g: 0x42, b: 0xf4 } }
 ], 50000);
 
+let second = new HalvorsenAttractor({b: 0.208186, t: 1.5}, {x: 1000, y: 222, z: 456},
+	{x: 0, y: 3000, z: 500},
+	[
+		{ pct: 0, color: { r: 0xf4, g: 0xee, b: 0x42 } },
+		{ pct: 0.5, color: { r: 0x41, g: 0xf4, b: 0x68 } },
+  	{ pct: 1, color: { r: 0x41, g: 0xdf, b: 0xf4 } }
+	],
+	20000,
+	20000);
+
+let g = new THREE.BoxBufferGeometry( 100, 100, 100 );
+let m = new THREE.MeshNormalMaterial(/*{color: 0x290a5b}*/);
+let box = new THREE.Mesh( g, m );
+scene.add( box );
+
 function animate () {
 	//light.intensity = analyser.getFrequencyData()[3] / 255;
 	camera.position.z += up + down;
 	camera.position.x += left + right;
 	//camera.rotation.x += 0.1;
   controls.update();
+	box.rotation.x += 0.003;
+	box.rotation.y += 0.003;
 	first.update();
+	second.update();
   TWEEN.update();
 	stats.update();
   //console.log( analyser.getFrequencyData()[7] );
 	//update_color();
 	renderer.render( scene, camera );
+	renderer.clearDepth();
   requestAnimationFrame( animate );
 };
 
@@ -489,19 +691,17 @@ window.addEventListener('resize', function () {
   camera.updateProjectionMatrix();
 });
 
+
 /*
 create_fractal(3000, ( i ) => {
 
-<<<<<<< HEAD
 	return {x: (Math.sin(i*6) * i), y: (3/150-i) + 600, z: (Math.cos( 5 * i) * i)}
-	//return {x: (Math.cos( 5 * i) * i), y: (Math.sin(i*6) * i), z: (3/150-i)}
-=======
+	//return {x: (Math.cos( 5 * i) * i), y: (Math.sin(i*6) * i), z: (3/150-i)};
 	//i = i * 0.7;
 	//return {x: (Math.sin(i*6) * i), y: (3/150-i) + 600, z: (Math.cos( 5 * i) * i)}
-	return first.draw();
+	//return first.draw();
 	//return {x: (Math.cos( 5 * i) * i), y: (Math.sin(i*6) * i), z: (3/150-i)}
-	//return {x: Math.cos( 5 * i), y: i, z: i}
->>>>>>> fractals
+	//return {x: Math.cos( 5 * i), y: i, z: i};
 
 });
 */
