@@ -50,3 +50,15 @@ canvas {
   height: 100%;
   width: 0%;
 }
+
+.bar-container {
+  position: fixed;
+  bottom: 0;
+  width: 100px;
+  transform: rotate(180deg);
+}
+
+.bar {
+  background: rgba( 100, 255, 255, 0.5 );
+  float: right;
+}
