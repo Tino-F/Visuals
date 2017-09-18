@@ -7,6 +7,7 @@ html
     script(src='/js/three.min.js')
     script(src='/js/Fractals.js')
     script(src='/js/TrackballControls.js')
+    script(src='https://threejs.org/examples/js/controls/FlyControls.js')
     script(src='/js/stats.min.js')
     script(src='/js/SkyShader.js')
     script(src='js/Tween.js')
@@ -23,4 +24,13 @@ html
         p#loading Loading...
         div#loading_bar
           div#progress
+
+    div.instruments
+      div.acceleration-container
+        div#acceleration
+
+    div.crosshairs(align='center')
+      div.horizontal
+      div.vertical
+
     script(src='js/fireworks.js')

@@ -252,16 +252,38 @@ class HalvorsenAttractor {
     });
 	}
 
-	constructor ( vars, origin, placement, colors, m, n ) {
+	constructor ( options, n ) {
     //{b: b < 1, t: 1}
-		this.colors = colors;
-		this.m = m;
-		this.placement = placement;
-    this.b = vars.b;
-		this.t = vars.t;
-		this.x = origin.x;
-		this.y = origin.y;
-		this.z = origin.z;
+    if ( !options.colors ) {
+      this.colors = defaultColor;
+    } else {
+      this.colors = options.colors;
+    }
+
+    if ( !options.scale ) {
+      this.m = 1000;
+    } else {
+      this.m = options.scale;
+    }
+
+    if ( !options.initial ) {
+      this.x = 0;
+  		this.y = 0;
+  		this.z = 0;
+    } else {
+      this.x = options.initial.x;
+  		this.y = options.initial.y;
+  		this.z = options.initial.z;
+    }
+
+    if ( !options.offset ) {
+      this.placement = { x: 0, y: 0, z: 0 };
+    } else {
+      this.placement = {x: options.offset.x, y: options.offset.y, z: options.offset.z};
+    }
+
+    this.b = options.b;
+		this.t = options.t;
 		this.point_shapes = [];
 		this.point_materials = [];
     this.pointArray = [];
