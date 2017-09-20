@@ -1,14 +1,12 @@
-let up = 0,
-	down = 0,
-	left = 0,
-	right = 0,
-	tofroMax = 30,
-	increments = 0.1,
-	sensitivity = 3,
+let	MaxSpeed = 30,
+	increments = 0.3,
+	sensitivity = 6,
 	upint,
 	downint,
 	leftint,
-	rightint;
+	rightint,
+	forwardint,
+	backint;
 let playing = false;
 let title = document.getElementById('title');
 let loading = document.getElementById('loading');
@@ -16,7 +14,7 @@ let progress = document.getElementById('progress');
 let acceleration = document.getElementById('acceleration');
 let scene = new THREE.Scene();
 scene.background = new THREE.Color( 0x000000 );
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 200000 );
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 200000 );
 let light = new THREE.PointLight(0xffffff, 0.5);
 light.position.y = 5000
 scene.add( light );
@@ -25,14 +23,16 @@ camera.position.z = 15000;
 let renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
-renderer.autoclear = false;
 let stats = new Stats();
 document.body.append( stats.dom )
 let listener = new THREE.AudioListener();
 camera.add( listener );
 let sound = new THREE.Audio( listener );
 let audioLoader = new THREE.AudioLoader();
-//let controls = new THREE.TrackballControls( camera );
+let controls = new THREE.PointerLockControls( camera );
+scene.add( controls.getObject() );
+controls.enabled = true;
+let velocity = new THREE.Vector3();
 
 //sad.mp3 touch.mp3 Fake.wav woah.mp3
 
@@ -79,26 +79,14 @@ document.addEventListener('keydown', ( e ) => {
 
 	let evnt = window.event ? window.event : e;
 
-	if ( evnt.keyCode == 87 ) {
+	if ( evnt.keyCode == 82 ) {
+		//R
 
-		if ( up < tofroMax && !upint ) {
+		if ( velocity.y < MaxSpeed && !upint ) {
 			upint = setInterval(() => {
-				up = up + increments;
-				let height = Math.floor( ( up / tofroMax ) * 50 );
+				velocity.y += increments;
 
-				if ( height < 0 ) {
-					acceleration.style.top = '50px';
-					acceleration.style.bottom = '';
-					acceleration.style.transform = 'rotate(180deg)';
-					acceleration.style.height = ( height * -1 ) + 'px';
-				} else {
-					acceleration.style.top = '';
-					acceleration.style.bottom = '50px';
-					acceleration.style.transform = '';
-					acceleration.style.height = height + 'px';
-				}
-
-				if ( up >= tofroMax ) {
+				if ( velocity.y >= MaxSpeed ) {
 					clearInterval( upint );
 				}
 			}, 10);
@@ -106,26 +94,14 @@ document.addEventListener('keydown', ( e ) => {
 
 	}
 
-	if ( evnt.keyCode == 83 ) {
-		if ( up > ( tofroMax * -1 ) && !downint ) {
+	if ( evnt.keyCode == 70 ) {
+		//F
+		if ( velocity.y > ( MaxSpeed * -1 ) && !downint ) {
 			downint = setInterval(() => {
-				up = up - increments;
-				let max = tofroMax * -1;
-				let height = Math.floor( ( up / tofroMax ) * 50 );
+				velocity.y -= increments;
+				let max = MaxSpeed * -1;
 
-				if ( height < 0 ) {
-					acceleration.style.top = '50px';
-					acceleration.style.bottom = '';
-					acceleration.style.transform = 'rotate(180deg)';
-					acceleration.style.height = ( height * -1 ) + 'px';
-				} else {
-					acceleration.style.top = '';
-					acceleration.style.bottom = '50px';
-					acceleration.style.transform = '';
-					acceleration.style.height = height + 'px';
-				}
-
-				if ( up <= max ) {
+				if ( velocity.y <= max ) {
 					clearInterval( downint );
 					downint = false;
 				}
@@ -133,12 +109,70 @@ document.addEventListener('keydown', ( e ) => {
 		}
 	}
 
-	if ( evnt.keyCode == 39 ) {
-		left = -2;
+	if ( evnt.keyCode == 83 ) {
+		//W
+		if ( velocity.z < MaxSpeed && !forwardint ) {
+
+			forwardint = setInterval(() => {
+				velocity.z += increments;
+
+				if ( velocity.z >= MaxSpeed ) {
+					clearInterval( forwardint );
+					forwardint = false;
+				}
+			}, 10);
+
+		}
 	}
 
-	if( evnt.keyCode == 37 ) {
-		right = 2;
+	if( evnt.keyCode == 87 ) {
+		//S
+		if ( velocity.z >= ( MaxSpeed * - 1 ) && !backint ) {
+
+			backint = setInterval(() => {
+				velocity.z -= increments;
+				let max = MaxSpeed * -1;
+
+				if ( velocity.z <= max ) {
+					clearInterval( backint );
+					backint = false;
+				}
+			}, 10);
+
+		}
+	}
+
+	if ( evnt.keyCode == 68 ) {
+		//D
+		if ( velocity.x < MaxSpeed && !rightint ) {
+
+			rightint = setInterval(() => {
+				velocity.x += increments;
+
+				if ( velocity.x >= MaxSpeed ) {
+					clearInterval( rightint );
+					rightint = false;
+				}
+			}, 10);
+
+		}
+	}
+
+	if( evnt.keyCode == 65 ) {
+		//A
+		if ( velocity.x >= ( MaxSpeed * - 1 ) && !leftint ) {
+
+			leftint = setInterval(() => {
+				velocity.x -= increments;
+				let max = MaxSpeed * -1;
+
+				if ( velocity.x <= max ) {
+					clearInterval( leftint );
+					leftint = false;
+				}
+			}, 10);
+
+		}
 	}
 
 });
@@ -146,34 +180,59 @@ document.addEventListener('keydown', ( e ) => {
 document.addEventListener('keyup', ( e ) => {
 	let evnt = window.event ? window.event : e;
 
-	if ( evnt.keyCode == 87 ) {
+	if ( evnt.keyCode == 82 ) {
+		//R
 		clearInterval( upint );
 		upint = false;
 	}
 
-	if( evnt.keyCode == 83 ) {
+	if( evnt.keyCode == 70 ) {
+		//F
 		clearInterval( downint );
 		downint = false;
 	}
 
-	if ( evnt.keyCode == 39 ) {
-		left = 0;
+	if ( evnt.keyCode == 83 ) {
+		//W
+		clearInterval( forwardint );
+		forwardint = false;
 	}
 
-	if( evnt.keyCode == 37 ) {
-		right = 0;
+	if( evnt.keyCode == 87 ) {
+		//S
+		clearInterval( backint );
+		backint = false;
+	}
+
+	if( evnt.keyCode == 65 ) {
+		//A
+		clearInterval( leftint );
+		leftint = false;
+	}
+
+	if( evnt.keyCode == 68 ) {
+		//D
+		clearInterval( rightint );
+		rightint = false;
 	}
 
 });
 
-document.addEventListener('mousemove', ( evnt ) => {
-	let e = window.event ? window.event : evnt;
+function update_speed_bar () {
+	let height = Math.floor( ( velocity.y / tofroMax ) * 50 );
 
-	let amountX = e.clientX / window.innerWidth;
-	let amountY = e.clientY / window.innerHeight;
-	camera.rotation.y = Math.PI * amountX * sensitivity * -1;
-	camera.rotation.x = Math.PI * amountY * sensitivity;
-});
+	if ( height < 0 ) {
+		acceleration.style.top = '50px';
+		acceleration.style.bottom = '';
+		acceleration.style.transform = 'rotate(180deg)';
+		acceleration.style.height = ( height * -1 ) + 'px';
+	} else {
+		acceleration.style.top = '';
+		acceleration.style.bottom = '50px';
+		acceleration.style.transform = '';
+		acceleration.style.height = height + 'px';
+	}
+};
 
 let mx = 1.8;
 
@@ -215,10 +274,10 @@ let box = new THREE.Mesh( g, m );
 scene.add( box );
 
 function animate () {
-	camera.position.z -= up + down;
-	camera.position.x += left + right;
-  //controls.update();
 	AudioSpectrum.update();
+	camera.position.x += velocity.x;
+	camera.position.y += velocity.y;
+	camera.position.z += velocity.z;
 	box.rotation.x += 0.003;
 	box.rotation.y += 0.003;
 	let s = analyser.getAverageFrequency() / 100;
