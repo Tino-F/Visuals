@@ -17,9 +17,11 @@ function move() {
 
 server.on('new user', ( user ) => {
 
-  let g = new THREE.SphereBufferGeometry( 100, 100, 100 );
+  let g = new THREE.SphereBufferGeometry( 30, 30, 30 );
   let m = new THREE.MeshNormalMaterial({color: user.Color});
-  let shape = new Three.Line( g, m );
+  let shape = new THREE.Line( g, m );
+  scene.add( shape );
+  console.log( user.Username );
 
 });
 

@@ -157,6 +157,12 @@ class LorenzAttractor {
       this.colors = options.colors;
     }
 
+    if ( !options.pointSize ) {
+      this.pointSize = 1;
+    } else {
+      this.pointSize = options.pointSize;
+    }
+
 		this.a = options.a;
 		this.b = options.b;
 		this.c = options.c;
@@ -176,7 +182,7 @@ class LorenzAttractor {
     for ( let i = 0; i < this.fftSize; i++ ) {
 			let shape = new THREE.Geometry();
 			this.point_shapes[i] = shape ;
-			this.point_materials[i] = new THREE.PointsMaterial({color: 0xffffff});
+			this.point_materials[i] = new THREE.PointsMaterial({color: 0xffffff, size: this.pointSize});
 		}
 
 		for (let i = 0; i < n; i++) {
@@ -283,6 +289,12 @@ class HalvorsenAttractor {
       this.placement = {x: options.offset.x, y: options.offset.y, z: options.offset.z};
     }
 
+    if ( !options.pointSize ) {
+      this.pointSize = 1;
+    } else {
+      this.pointSize = options.pointSize;
+    }
+
     this.b = options.b;
 		this.t = options.t;
 		this.point_shapes = [];
@@ -297,7 +309,7 @@ class HalvorsenAttractor {
 		for ( let i = 0; i < this.fftSize; i++ ) {
 			let shape = new THREE.Geometry();
 			this.point_shapes[i] = shape ;
-			this.point_materials[i] = new THREE.PointsMaterial({color: 0xffffff});
+			this.point_materials[i] = new THREE.PointsMaterial({color: 0xffffff, size: this.pointSize});
 		}
 
 		for (let i = 0; i < n; i++) {

@@ -33,6 +33,7 @@ function addUser ( user, s ) {
 
             if ( !err ) {
 
+              s.broadcast.emit('new user', user);
               s.emit('added', { err: false });
               console.log( `${user.Username} has joined the server.`);
               db.close();
@@ -93,6 +94,35 @@ function removeUser ( s ) {
 
 };
 
+function move ( user, s ) {
+
+  s.broadcast.emit('movement', user);
+
+  MongoClient.connect( url, ( err, db ) => {
+
+    if ( !err ) {
+
+      db.collection('Online').updateOne({ Username: user.Username }, user, ( err, r ) => {
+
+        if ( !err ) {
+          db.close();
+        } else {
+          console.log( err );
+          db.close();
+        }
+
+      });
+
+    } else {
+
+      console.log( err );
+
+    }
+
+  })
+
+};
+
 exports.init = ( io ) => {
 
   io.on( 'connection', s => {
@@ -105,11 +135,19 @@ exports.init = ( io ) => {
 
     s.on('ready', ( data ) => {
       let user = User( s );
-      user.Rotation = data.Rotation;
       user.Velocity = data.Velocity;
       console.log( user );
 
       addUser( user, s );
+
+    });
+
+    s.on('move', ( data ) => {
+
+      let user = User( s );
+      user.Velocity = data.Velocity;
+      console.log( user );
+      move( user, s );
 
     });
 

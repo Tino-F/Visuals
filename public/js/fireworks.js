@@ -6,6 +6,7 @@ let	MaxSpeed = 4000,
 	leftint,
 	rightint,
 	forwardint,
+	size = 15,
 	backint;
 let playing = false;
 let title = document.getElementById('title');
@@ -116,6 +117,7 @@ let first = new LorenzAttractor({
 		{ pct: 0.5, color: { r: 0x4e, g: 0x42, b: 0xf4 } },
 	  { pct: 1, color: { r: 0xe5, g: 0x42, b: 0xf4 } }
 	],
+	pointSize: size,
 	analyser: analyser
 }, 50000);
 
@@ -130,6 +132,7 @@ let second = new HalvorsenAttractor({
 		{ pct: 0.5, color: { r: 0x41, g: 0xf4, b: 0x68 } },
   	{ pct: 1, color: { r: 0x41, g: 0xdf, b: 0xf4 } }
 	],
+	pointSize: size,
 	analyser: analyser
 }, 40000);
 
