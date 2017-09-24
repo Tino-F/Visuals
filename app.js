@@ -92,10 +92,7 @@ app.post('/register', ( req, res ) => {
   backend.register( req, res )
 })
 
-app.listen(port, ( err ) => {
-  if ( !err ) {
-    console.log('Listening on:', port);
-  } else {
-    console.log( err );
-  }
-})
+const server = require( 'http' ).Server( app );
+const io = require( 'socket.io' )( server );
+server.listen( port );
+console.log( `Listening on port ${port}.` );
