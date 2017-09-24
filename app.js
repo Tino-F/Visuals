@@ -96,3 +96,10 @@ const server = require( 'http' ).Server( app );
 const io = require( 'socket.io' )( server );
 server.listen( port );
 console.log( `Listening on port ${port}.` );
+
+io.use(socketsession(session, {
+    autoSave: true
+} ));
+
+let socketcode = require('./mmo.js');
+socketcode.init( io );

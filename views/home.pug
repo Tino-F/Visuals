@@ -9,15 +9,14 @@ html
     script(src='/js/SpaceControls.js')
     script(src='/js/TrackballControls.js')
     script(src='https://threejs.org/examples/js/controls/PointerLockControls.js')
-    script(src='https://threejs.org/examples/js/controls/FlyControls.js')
     script(src='/js/stats.min.js')
-    script(src='/js/SkyShader.js')
     script(src='js/Tween.js')
+    script(src='/socket.io/socket.io.js')
   body
     div#title(align='center')
       div
         h1 Enjoy the visuals #{user.Username}
-        
+
         br
         p
           i Song: Drake - Fake Love (Electric Mantis remix)
@@ -30,5 +29,6 @@ html
       div.horizontal
       div.vertical
 
+    script(src='/js/mmo_client.js')
     script(src='/js/fireworks.js')
     script(src='/js/keyboard_controler.js')

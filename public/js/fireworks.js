@@ -42,6 +42,18 @@ audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 	sound.setVolume(1);
   title.style.opacity = 1;
 	playing = true;
+	server.emit('ready', {
+		Velocity: {
+			x: velocity.x,
+			y: velocity.y,
+			z: velocity.z
+		},
+		Rotation: {
+			x: camera.rotation.x,
+			y: camera.rotation.y,
+			z: camera.rotation.z
+		}
+	});
   let fade_int = setInterval(() => {
 		if ( title.style.opacity >= 0 ) {
 			title.style.opacity -= 0.05;
@@ -130,6 +142,8 @@ document.body.appendChild( AudioSpectrum.Dom );
 let g = new THREE.CubeGeometry( 100, 100, 100 );
 let m = new THREE.MeshNormalMaterial();
 let box = new THREE.Mesh( g, m );
+box.position.x = 500;
+velocity.z = -20;
 scene.add( box );
 
 let prevTime = performance.now();
