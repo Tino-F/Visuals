@@ -1,5 +1,5 @@
-let	MaxSpeed = 10000,
-	increments = 3,
+let	MaxSpeed = 4000,
+	increments = 5,
 	sensitivity = 20,
 	upint,
 	downint,
@@ -32,7 +32,7 @@ let audioLoader = new THREE.AudioLoader();
 let controls = new THREE.PointerLockControls( camera );
 scene.add( controls.getObject() );
 controls.enabled = true;
-let velocity = new THREE.Vector3();
+let velocity = {x: 0, y: 0, z: 0};
 
 //sad.mp3 touch.mp3 Fake.wav woah.mp3
 

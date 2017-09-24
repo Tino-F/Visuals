@@ -8,6 +8,7 @@ document.addEventListener('keydown', ( e ) => {
 		if ( velocity.y < MaxSpeed && !upint ) {
 			upint = setInterval(() => {
 				velocity.y += increments;
+				move();
 
 				if ( velocity.y >= MaxSpeed ) {
 					clearInterval( upint );
@@ -23,6 +24,7 @@ document.addEventListener('keydown', ( e ) => {
 			downint = setInterval(() => {
 				velocity.y -= increments;
 				let max = MaxSpeed * -1;
+				move();
 
 				if ( velocity.y <= max ) {
 					clearInterval( downint );
@@ -38,6 +40,7 @@ document.addEventListener('keydown', ( e ) => {
 
 			forwardint = setInterval(() => {
 				velocity.z += increments;
+				move();
 
 				if ( velocity.z >= MaxSpeed ) {
 					clearInterval( forwardint );
@@ -55,6 +58,7 @@ document.addEventListener('keydown', ( e ) => {
 			backint = setInterval(() => {
 				velocity.z -= increments;
 				let max = MaxSpeed * -1;
+				move();
 
 				if ( velocity.z <= max ) {
 					clearInterval( backint );
@@ -71,6 +75,7 @@ document.addEventListener('keydown', ( e ) => {
 
 			rightint = setInterval(() => {
 				velocity.x += increments;
+				move();
 
 				if ( velocity.x >= MaxSpeed ) {
 					clearInterval( rightint );
@@ -88,6 +93,7 @@ document.addEventListener('keydown', ( e ) => {
 			leftint = setInterval(() => {
 				velocity.x -= increments;
 				let max = MaxSpeed * -1;
+				move();
 
 				if ( velocity.x <= max ) {
 					clearInterval( leftint );
