@@ -1,6 +1,6 @@
-let	MaxSpeed = 30,
-	increments = 0.3,
-	sensitivity = 6,
+let	MaxSpeed = 10000,
+	increments = 3,
+	sensitivity = 20,
 	upint,
 	downint,
 	leftint,
@@ -19,7 +19,7 @@ let light = new THREE.PointLight(0xffffff, 0.5);
 light.position.y = 5000
 scene.add( light );
 scene.add( new THREE.AmbientLight(0xffffff, 0.5) );
-camera.position.z = 15000;
+camera.position.z = 0;
 let renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
@@ -36,7 +36,7 @@ let velocity = new THREE.Vector3();
 
 //sad.mp3 touch.mp3 Fake.wav woah.mp3
 
-audioLoader.load( 'music/woah.mp3', ( buffer ) => {
+audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
 	sound.setVolume(1);
@@ -61,7 +61,7 @@ audioLoader.load( 'music/woah.mp3', ( buffer ) => {
 }
 );
 
-let analyser = new THREE.AudioAnalyser( sound, 32 );
+let analyser = new THREE.AudioAnalyser( sound, 128 );
 document.body.append( renderer.domElement );
 
 function random ( min, max, sign ) {
@@ -74,149 +74,6 @@ function random ( min, max, sign ) {
   return rn;
 
 };
-
-document.addEventListener('keydown', ( e ) => {
-
-	let evnt = window.event ? window.event : e;
-
-	if ( evnt.keyCode == 82 ) {
-		//R
-
-		if ( velocity.y < MaxSpeed && !upint ) {
-			upint = setInterval(() => {
-				velocity.y += increments;
-
-				if ( velocity.y >= MaxSpeed ) {
-					clearInterval( upint );
-				}
-			}, 10);
-		}
-
-	}
-
-	if ( evnt.keyCode == 70 ) {
-		//F
-		if ( velocity.y > ( MaxSpeed * -1 ) && !downint ) {
-			downint = setInterval(() => {
-				velocity.y -= increments;
-				let max = MaxSpeed * -1;
-
-				if ( velocity.y <= max ) {
-					clearInterval( downint );
-					downint = false;
-				}
-			}, 10);
-		}
-	}
-
-	if ( evnt.keyCode == 83 ) {
-		//W
-		if ( velocity.z < MaxSpeed && !forwardint ) {
-
-			forwardint = setInterval(() => {
-				velocity.z += increments;
-
-				if ( velocity.z >= MaxSpeed ) {
-					clearInterval( forwardint );
-					forwardint = false;
-				}
-			}, 10);
-
-		}
-	}
-
-	if( evnt.keyCode == 87 ) {
-		//S
-		if ( velocity.z >= ( MaxSpeed * - 1 ) && !backint ) {
-
-			backint = setInterval(() => {
-				velocity.z -= increments;
-				let max = MaxSpeed * -1;
-
-				if ( velocity.z <= max ) {
-					clearInterval( backint );
-					backint = false;
-				}
-			}, 10);
-
-		}
-	}
-
-	if ( evnt.keyCode == 68 ) {
-		//D
-		if ( velocity.x < MaxSpeed && !rightint ) {
-
-			rightint = setInterval(() => {
-				velocity.x += increments;
-
-				if ( velocity.x >= MaxSpeed ) {
-					clearInterval( rightint );
-					rightint = false;
-				}
-			}, 10);
-
-		}
-	}
-
-	if( evnt.keyCode == 65 ) {
-		//A
-		if ( velocity.x >= ( MaxSpeed * - 1 ) && !leftint ) {
-
-			leftint = setInterval(() => {
-				velocity.x -= increments;
-				let max = MaxSpeed * -1;
-
-				if ( velocity.x <= max ) {
-					clearInterval( leftint );
-					leftint = false;
-				}
-			}, 10);
-
-		}
-	}
-
-});
-
-document.addEventListener('keyup', ( e ) => {
-	let evnt = window.event ? window.event : e;
-
-	if ( evnt.keyCode == 82 ) {
-		//R
-		clearInterval( upint );
-		upint = false;
-	}
-
-	if( evnt.keyCode == 70 ) {
-		//F
-		clearInterval( downint );
-		downint = false;
-	}
-
-	if ( evnt.keyCode == 83 ) {
-		//W
-		clearInterval( forwardint );
-		forwardint = false;
-	}
-
-	if( evnt.keyCode == 87 ) {
-		//S
-		clearInterval( backint );
-		backint = false;
-	}
-
-	if( evnt.keyCode == 65 ) {
-		//A
-		clearInterval( leftint );
-		leftint = false;
-	}
-
-	if( evnt.keyCode == 68 ) {
-		//D
-		clearInterval( rightint );
-		rightint = false;
-	}
-
-});
 
 function update_speed_bar () {
 	let height = Math.floor( ( velocity.y / tofroMax ) * 50 );
@@ -246,7 +103,8 @@ let first = new LorenzAttractor({
 		{ pct: 0, color: { r: 0x41, g: 0xf4, b: 0xc4 } },
 		{ pct: 0.5, color: { r: 0x4e, g: 0x42, b: 0xf4 } },
 	  { pct: 1, color: { r: 0xe5, g: 0x42, b: 0xf4 } }
-	]
+	],
+	analyser: analyser
 }, 50000);
 
 let second = new HalvorsenAttractor({
@@ -259,7 +117,8 @@ let second = new HalvorsenAttractor({
 		{ pct: 0, color: { r: 0xf4, g: 0xee, b: 0x42 } },
 		{ pct: 0.5, color: { r: 0x41, g: 0xf4, b: 0x68 } },
   	{ pct: 1, color: { r: 0x41, g: 0xdf, b: 0xf4 } }
-	]
+	],
+	analyser: analyser
 }, 40000);
 
 scene.add( first.fractal );
@@ -273,13 +132,24 @@ let m = new THREE.MeshNormalMaterial();
 let box = new THREE.Mesh( g, m );
 scene.add( box );
 
+let prevTime = performance.now();
+
 function animate () {
 	AudioSpectrum.update();
+	/*
 	camera.position.x += velocity.x;
 	camera.position.y += velocity.y;
 	camera.position.z += velocity.z;
+	*/
+	let time = performance.now();
+	let delta = ( time - prevTime ) / 1000;
+	controls.getObject().translateX( velocity.x * delta );
+	controls.getObject().translateY( velocity.y * delta );
+	controls.getObject().translateZ( velocity.z * delta );
+	prevTime = time;
 	box.rotation.x += 0.003;
 	box.rotation.y += 0.003;
+	analyser.getFrequencyData();
 	let s = analyser.getAverageFrequency() / 100;
 	if ( playing ) { box.scale.set( s, s, s ) };
 	first.update();

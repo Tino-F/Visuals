@@ -1,0 +1,32 @@
+html
+  head
+    title Login
+    script(src="https://code.jquery.com/jquery-3.2.1.min.js", integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=", crossorigin="anonymous")
+    link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css", integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u", crossorigin="anonymous")
+    script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa", crossorigin="anonymous")
+    link(rel='stylesheet', href='/css/main.css')
+  body.login
+    div#center(align='center')
+
+      h1 Login
+
+      form.login-form(method='post', action='login')
+        span Username
+        br
+        input(type='text', name='username')
+
+        br
+
+        span Password
+        br
+        input(type='password', name='password')
+
+        br
+
+        button(type='submit', value='submit') Submit
+
+      p.login-err= err
+
+      p Don't have an account?
+
+      a(href='/register') Click here.

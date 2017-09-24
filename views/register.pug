@@ -1,0 +1,65 @@
+html
+  head
+    title MMO
+    script(src="https://code.jquery.com/jquery-3.2.1.min.js", integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=", crossorigin="anonymous")
+    link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css", integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u", crossorigin="anonymous")
+    script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa", crossorigin="anonymous")
+    link(rel='stylesheet', href='css/main.css')
+  body.register_body
+    div.register.container#center(align='center')
+      h1 Register
+      p.error= err
+
+      form(method='post', action='/register')
+
+        span First Name
+        br
+        input(type='text', name='firstname')
+
+        br
+
+        span Last Name
+        br
+        input(type='text', name='lastname')
+
+        br
+
+        span Email
+        br
+        input(type='email', name='email')
+
+        br
+
+        span Username
+        br
+        input(type='text', name='username')
+
+        br
+
+        span Password
+        br
+        input(type='password', name='password1')
+
+        br
+
+        span Re-enter Password
+        br
+        input(type='password', name='password2')
+
+        br
+
+        span Color
+        br
+        input(type='color', name='color')
+
+        br
+        br
+
+        textarea(name='description')
+
+        br
+        br
+        br
+        br
+
+        button.btn.btn-default(type='submit', value='submit') submit

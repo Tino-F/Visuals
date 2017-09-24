@@ -16,9 +16,8 @@ html
   body
     div#title(align='center')
       div
-        h1 Tino Fileccia
-        p
-          b Breaking the traditional.
+        h1 Enjoy the visuals #{user.Username}
+        
         br
         p
           i Song: Drake - Fake Love (Electric Mantis remix)
@@ -27,12 +26,9 @@ html
         div#loading_bar
           div#progress
 
-    div.instruments
-      div.acceleration-container
-        div#acceleration
-
     div.crosshairs(align='center')
       div.horizontal
       div.vertical
 
-    script(src='js/fireworks.js')
+    script(src='/js/fireworks.js')
+    script(src='/js/keyboard_controler.js')

@@ -170,9 +170,10 @@ class LorenzAttractor {
 		this.point_materials = [];
 		this.fractal = new THREE.Group();
 		this.nuked = false;
-		let average = (n - (n % 16)) / 16;
+    this.fftSize = options.analyser.getFrequencyData().length;
+    let average = (n - (n % this.fftSize)) / this.fftSize;
 
-    for ( let i = 0; i < 16; i++ ) {
+    for ( let i = 0; i < this.fftSize; i++ ) {
 			let shape = new THREE.Geometry();
 			this.point_shapes[i] = shape ;
 			this.point_materials[i] = new THREE.PointsMaterial({color: 0xffffff});
@@ -189,8 +190,8 @@ class LorenzAttractor {
 			point.y = coordinates.y;
 			point.z = coordinates.z;
 
-			if ( Math.floor( i / average )  > 15) {
-				group = 15;
+			if ( Math.floor( i / average )  > ( this.fftSize - 1 )) {
+				group = this.fftSize - 1;
 			} else {
 				group = Math.floor( i / average );
 			}
@@ -289,9 +290,11 @@ class HalvorsenAttractor {
     this.pointArray = [];
 		this.fractal = new THREE.Group();
 		this.nuked = false;
-		let average = (n - (n % 16)) / 16;
+    this.fftSize = options.analyser.getFrequencyData().length;
 
-		for ( let i = 0; i < 16; i++ ) {
+		let average = (n - (n % this.fftSize)) / this.fftSize;
+
+		for ( let i = 0; i < this.fftSize; i++ ) {
 			let shape = new THREE.Geometry();
 			this.point_shapes[i] = shape ;
 			this.point_materials[i] = new THREE.PointsMaterial({color: 0xffffff});
@@ -308,8 +311,8 @@ class HalvorsenAttractor {
 			point.y = coordinates.y;
 			point.z = coordinates.z;
 
-			if ( Math.floor( i / average )  > 15) {
-				group = 15;
+			if ( Math.floor( i / average )  > ( this.fftSize - 1 ) ) {
+				group = ( this.fftSize - 1 );
 			} else {
 				group = Math.floor( i / average );
 			}
@@ -344,15 +347,17 @@ class AudioBars {
   constructor ( analyser, scale ) {
 
     this.analyser = analyser;
+    this.length = analyser.getFrequencyData().length;
     this.Dom = document.createElement('div');
     this.Dom.classList.add('bar-container');
     this.Bars = [];
 		this.scale = scale;
+    this.width = ( ( 1 / this.length ) * 100 ) + '%';
 
-    for ( let i = 0; i < 16; i++ ) {
+    for ( let i = 0; i < this.length; i++ ) {
       let bar = document.createElement('div');
       bar.classList.add('bar');
-      bar.style.width = '6.25%';
+      bar.style.width = this.width;
       this.Dom.appendChild( bar );
 			this.Bars.push( bar );
     }
