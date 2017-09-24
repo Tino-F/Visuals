@@ -28,7 +28,7 @@ let stats = new Stats();
 document.body.append( stats.dom )
 let listener = new THREE.AudioListener();
 camera.add( listener );
-let sound = new THREE.Audio( listener );
+let sound = new THREE.PositionalAudio( listener );
 let audioLoader = new THREE.AudioLoader();
 let controls = new THREE.PointerLockControls( camera );
 scene.add( controls.getObject() );
@@ -40,7 +40,7 @@ let velocity = {x: 0, y: 0, z: 0};
 audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
-	sound.setVolume(1);
+	sound.setRefDistance( 500 );
   title.style.opacity = 1;
 	playing = true;
 	server.emit('ready', {
@@ -145,6 +145,7 @@ document.body.appendChild( AudioSpectrum.Dom );
 let g = new THREE.CubeGeometry( 100, 100, 100 );
 let m = new THREE.MeshNormalMaterial();
 let box = new THREE.Mesh( g, m );
+box.add( sound );
 box.position.x = 500;
 velocity.z = -20;
 scene.add( box );
