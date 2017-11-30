@@ -3,8 +3,6 @@ let users = {};
 
 function move() {
 
-  let v = controls.getObject();
-
   server.emit('move', {
     Velocity: {
 			x: velocity.x,

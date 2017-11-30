@@ -3,7 +3,11 @@ url = 'mongodb://localhost:27017/';
 
 MongoClient.connect( url, ( err, db ) => {
 
-  db.collection('Online').remove();
+  if ( !err ) {
+    db.collection('Online').remove();
+  } else {
+    console.log( 'You forgot to start the database...' );
+  }
 
 });
 

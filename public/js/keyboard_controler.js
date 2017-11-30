@@ -1,8 +1,19 @@
+let	MaxSpeed = 4000,
+	increments = 5,
+	sensitivity = 10,
+	look_sensitivity = 10,
+	upint,
+	downint,
+	leftint,
+	rightint,
+	forwardint,
+	backint;
+
 document.addEventListener('keydown', ( e ) => {
 
 	let evnt = window.event ? window.event : e;
 
-	if ( evnt.keyCode == 82 ) {
+	if ( evnt.keyCode == 70 ) {
 		//R
 
 		if ( velocity.y < MaxSpeed && !upint ) {
@@ -18,7 +29,7 @@ document.addEventListener('keydown', ( e ) => {
 
 	}
 
-	if ( evnt.keyCode == 70 ) {
+	if ( evnt.keyCode == 82 ) {
 		//F
 		if ( velocity.y > ( MaxSpeed * -1 ) && !downint ) {
 			downint = setInterval(() => {
@@ -34,7 +45,7 @@ document.addEventListener('keydown', ( e ) => {
 		}
 	}
 
-	if ( evnt.keyCode == 83 ) {
+	if ( evnt.keyCode == 87 ) {
 		//W
 		if ( velocity.z < MaxSpeed && !forwardint ) {
 
@@ -51,7 +62,7 @@ document.addEventListener('keydown', ( e ) => {
 		}
 	}
 
-	if( evnt.keyCode == 87 ) {
+	if( evnt.keyCode == 83 ) {
 		//S
 		if ( velocity.z >= ( MaxSpeed * - 1 ) && !backint ) {
 
@@ -109,25 +120,25 @@ document.addEventListener('keydown', ( e ) => {
 document.addEventListener('keyup', ( e ) => {
 	let evnt = window.event ? window.event : e;
 
-	if ( evnt.keyCode == 82 ) {
+	if ( evnt.keyCode == 70 ) {
 		//R
 		clearInterval( upint );
 		upint = false;
 	}
 
-	if( evnt.keyCode == 70 ) {
+	if( evnt.keyCode == 82 ) {
 		//F
 		clearInterval( downint );
 		downint = false;
 	}
 
-	if ( evnt.keyCode == 83 ) {
+	if ( evnt.keyCode == 87 ) {
 		//W
 		clearInterval( forwardint );
 		forwardint = false;
 	}
 
-	if( evnt.keyCode == 87 ) {
+	if( evnt.keyCode == 83 ) {
 		//S
 		clearInterval( backint );
 		backint = false;
@@ -156,3 +167,18 @@ renderer.domElement.addEventListener('click', ( evnt ) => {
 		renderer.domElement.requestPointerLock();
 	}
 });
+
+let mouse_prev = {x: 0, y: 0};
+
+camera.rotation.order = 'YXZ';
+
+function look ( evnt ) {
+	let e = window.event ? window.event : evnt;
+
+	camera.rotation.x += ( ( mouse_prev.y - e.clientY ) * 0.01 );
+	camera.rotation.y += ( ( mouse_prev.x - e.clientX ) * -0.01 );
+
+	mouse_prev = {x: e.clientX, y: e.clientY};
+}
+
+window.addEventListener('mousemove', look);

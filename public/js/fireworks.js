@@ -1,13 +1,4 @@
-let	MaxSpeed = 4000,
-	increments = 5,
-	sensitivity = 20,
-	upint,
-	downint,
-	leftint,
-	rightint,
-	forwardint,
-	size = 15,
-	backint;
+let size = 15;
 let playing = false;
 let title = document.getElementById('title');
 let loading = document.getElementById('loading');
@@ -30,19 +21,19 @@ let listener = new THREE.AudioListener();
 camera.add( listener );
 let sound = new THREE.PositionalAudio( listener );
 let audioLoader = new THREE.AudioLoader();
-let controls = new THREE.PointerLockControls( camera );
-scene.add( controls.getObject() );
-controls.enabled = true;
 let velocity = {x: 0, y: 0, z: 0};
 
 //sad.mp3 touch.mp3 Fake.wav woah.mp3
 
 audioLoader.load( 'music/Fake.wav', ( buffer ) => {
+	//initial audio load function
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
 	sound.setRefDistance( 500 );
+	sound.setVolume(1);
   title.style.opacity = 1;
 	playing = true;
+
 	server.emit('ready', {
 		Velocity: {
 			x: velocity.x,
@@ -54,7 +45,9 @@ audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 			y: camera.rotation.y,
 			z: camera.rotation.z
 		}
+
 	});
+
   let fade_int = setInterval(() => {
 		if ( title.style.opacity >= 0 ) {
 			title.style.opacity -= 0.05;
@@ -64,44 +57,29 @@ audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 			clearInterval( fade_int );
 		}
 	}, 10);
+
 }, ( xhr ) => {
+	//load progress function
 	let perc = (xhr.loaded / xhr.total * 100);
 	let loaded = 'Loading: ' + Math.floor(perc) + '%';
 	progress.style.width = ( (perc * 10) / 10 ) + '%';
 	loading.innerHTML = loaded;
-}, ( xhr ) => {
+
+}, ( err ) => {
+	//Error function
 	loading.innerHTML = '<span style="color: red;">An error has occured.</span>';
-}
-);
+
+});
 
 let analyser = new THREE.AudioAnalyser( sound, 128 );
+
 document.body.append( renderer.domElement );
 
 function random ( min, max, sign ) {
-
   let rn = Math.floor((Math.random() * max) + min);
-
   if ( sign )
     rn *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
-
   return rn;
-
-};
-
-function update_speed_bar () {
-	let height = Math.floor( ( velocity.y / tofroMax ) * 50 );
-
-	if ( height < 0 ) {
-		acceleration.style.top = '50px';
-		acceleration.style.bottom = '';
-		acceleration.style.transform = 'rotate(180deg)';
-		acceleration.style.height = ( height * -1 ) + 'px';
-	} else {
-		acceleration.style.top = '';
-		acceleration.style.bottom = '50px';
-		acceleration.style.transform = '';
-		acceleration.style.height = height + 'px';
-	}
 };
 
 let mx = 1.8;
@@ -150,30 +128,23 @@ box.position.x = 500;
 velocity.z = -20;
 scene.add( box );
 
-let prevTime = performance.now();
+let controls = new THREE.SpaceControls( camera, {
+	cb: ( x, y ) => { console.log( x, y ); }
+});
+
 
 function animate () {
 	AudioSpectrum.update();
-	/*
-	camera.position.x += velocity.x;
-	camera.position.y += velocity.y;
-	camera.position.z += velocity.z;
-	*/
-	let time = performance.now();
-	let delta = ( time - prevTime ) / 1000;
-	controls.getObject().translateX( velocity.x * delta );
-	controls.getObject().translateY( velocity.y * delta );
-	controls.getObject().translateZ( velocity.z * delta );
-	prevTime = time;
+	controls.update();
+	first.update();
+	second.update();
+  TWEEN.update();
+	stats.update();
 	box.rotation.x += 0.003;
 	box.rotation.y += 0.003;
 	analyser.getFrequencyData();
 	let s = analyser.getAverageFrequency() / 100;
 	if ( playing ) { box.scale.set( s, s, s ) };
-	first.update();
-	second.update();
-  TWEEN.update();
-	stats.update();
 	renderer.render( scene, camera );
   requestAnimationFrame( animate );
 };
