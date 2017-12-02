@@ -136,6 +136,8 @@ class LorenzAttractor {
 		let spectrum = analyser.getFrequencyData();
     let i = 0;
 
+    //console.log( spectrum );
+
     this.point_materials.forEach(( point ) => {
       let color = this.color( spectrum[i] / 255 );
       this.point_materials[i].color.setHex( color );

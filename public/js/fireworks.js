@@ -25,7 +25,7 @@ let velocity = {x: 0, y: 0, z: 0};
 
 //sad.mp3 touch.mp3 Fake.wav woah.mp3
 
-audioLoader.load( 'music/Fake.wav', ( buffer ) => {
+audioLoader.load( 'music/sad.mp3', ( buffer ) => {
 	//initial audio load function
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
@@ -128,9 +128,7 @@ box.position.x = 500;
 velocity.z = -20;
 scene.add( box );
 
-let controls = new THREE.SpaceControls( camera, {
-	cb: ( x, y ) => { console.log( x, y ); }
-});
+let controls = new THREE.SpaceControls( camera );
 
 
 function animate () {

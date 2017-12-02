@@ -12,6 +12,7 @@ THREE.SpaceControls = function ( camera, options ) {
     backint,
     endTime,
     startTime = Date.now(),
+    full_rotation = Math.PI * 2,
     mouse_prev = { x: 0, y: 0 };
 
   this.velocity = {
@@ -19,46 +20,58 @@ THREE.SpaceControls = function ( camera, options ) {
     y: 0,
     z: 0
   };
+
   this.camera = camera;
   this.camera.rotation.order = 'YXZ';
 
   //Set paramaters to class variables and set default values
   //Sensitivity, lookSensitivity, cb, and Acceleration
 
-  if ( !options.Sensitivity ) {
+  if ( !options ) {
 
     this.Sensitivity = 0.8;
-
-  } else {
-
-    this.Sensitivity = options.Sensitivity;
-
-  }
-
-  if ( !options.cb ) {
-
     this.cb = () => {};
-
-  } else {
-
-    this.cb = options.cb;
-
-  }
-
-  if ( !options.Acceleration ) {
-
-    this.Acceleration = 0.001;
-
-  } else {
-
-    this.Acceleration = options.Acceleration;
-
-  }
-
-  if ( !options.maxSpeed ) {
+    this.Acceleration = 0.0003;
     this.maxSpeed = 0.1;
+
   } else {
-    this.maxSpeed = options.maxSpeed;
+
+    if ( !options.Sensitivity ) {
+
+      this.Sensitivity = 0.8;
+
+    } else {
+
+      this.Sensitivity = options.Sensitivity;
+
+    }
+
+    if ( !options.cb ) {
+
+      this.cb = () => {};
+
+    } else {
+
+      this.cb = options.cb;
+
+    }
+
+    if ( !options.Acceleration ) {
+
+      this.Acceleration = 0.005;
+
+    } else {
+
+      this.Acceleration = options.Acceleration;
+
+    }
+
+    if ( !options.maxSpeed ) {
+      this.maxSpeed = 0.1;
+    } else {
+      this.maxSpeed = options.maxSpeed;
+    }
+
   }
 
   //Camera rotation algorithm on mouse movement
@@ -67,6 +80,7 @@ THREE.SpaceControls = function ( camera, options ) {
 
       let e = window.event ? window.event : evnt;
 
+
     	this.camera.rotation.x += ( ( mouse_prev.y - e.clientY ) * 0.01 ) * this.Sensitivity;
     	this.camera.rotation.y += ( ( mouse_prev.x - e.clientX ) * -0.01 ) * this.Sensitivity;
 
@@ -74,7 +88,69 @@ THREE.SpaceControls = function ( camera, options ) {
 
   });
 
+  this.updateVelocity = () => {
 
+      let direction = this.camera.getWorldDirection();
+
+      this.velocity.x += direction.x * this.Acceleration;
+      this.velocity.y += direction.y * this.Acceleration;
+      this.velocity.z += direction.z * this.Acceleration;
+
+  };
+
+  this.updateReverseVelocity = () => {
+    let direction = this.camera.getWorldDirection();
+
+    this.velocity.x -= direction.x * this.Acceleration;
+    this.velocity.y -= direction.y * this.Acceleration;
+    this.velocity.z -= direction.z * this.Acceleration;
+  };
+
+  this.accelerateUp = () => {
+
+    let direction = this.camera.getWorldDirection();
+    let rightcross = math.cross( [direction.x, direction.y, direction.z], [0, 1, 0] );
+    let upcross = math.cross( rightcross, [direction.x, direction.y, direction.z] );
+
+    this.velocity.x -= upcross[0] * this.Acceleration;
+    this.velocity.y -= upcross[1] * this.Acceleration;
+    this.velocity.z -= upcross[2] * this.Acceleration;
+
+  }
+
+  this.accelerateDown = () => {
+
+    let direction = this.camera.getWorldDirection();
+    let rightcross = math.cross( [direction.x, direction.y, direction.z], [0, 1, 0] );
+    let upcross = math.cross( rightcross, [direction.x, direction.y, direction.z] );
+
+    this.velocity.x += upcross[0] * this.Acceleration;
+    this.velocity.y += upcross[1] * this.Acceleration;
+    this.velocity.z += upcross[2] * this.Acceleration;
+
+  }
+
+  this.accelerateLeft = () => {
+
+    let direction = this.camera.getWorldDirection();
+    let rightcross = math.cross( [direction.x, direction.y, direction.z], [0, 1, 0] );
+
+    this.velocity.x -= rightcross[0] * this.Acceleration;
+    this.velocity.y -= rightcross[1] * this.Acceleration;
+    this.velocity.z -= rightcross[2] * this.Acceleration;
+
+  }
+
+  this.accelerateRight = () => {
+
+    let direction = this.camera.getWorldDirection();
+    let rightcross = math.cross( [direction.x, direction.y, direction.z], [0, 1, 0] );
+
+    this.velocity.x += rightcross[0] * this.Acceleration;
+    this.velocity.y += rightcross[1] * this.Acceleration;
+    this.velocity.z += rightcross[2] * this.Acceleration;
+
+  }
 
   document.addEventListener('keydown', ( e ) => {
 
@@ -86,7 +162,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		if ( this.velocity.y < this.maxSpeed && !upint ) {
         //
   			upint = setInterval(() => {
-  				this.velocity.y += this.Acceleration;
+  				this.accelerateUp();
           this.cb( this.velocity, startTime );
           this.update();
 
@@ -105,7 +181,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		//F
   		if ( this.velocity.y > ( this.maxSpeed * -1 ) && !downint ) {
   			downint = setInterval(() => {
-  				this.velocity.y -= this.Acceleration;
+  				this.accelerateDown();
   				let max = this.maxSpeed * -1;
           this.cb( this.velocity, startTime );
           this.update();
@@ -125,7 +201,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		if ( this.velocity.z < this.maxSpeed && !forwardint ) {
 
   			forwardint = setInterval(() => {
-  				this.velocity.z += this.Acceleration;
+  				this.updateVelocity();
           this.cb( this.velocity, startTime );
           this.update();
 
@@ -145,7 +221,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		if ( this.velocity.z >= ( this.maxSpeed * - 1 ) && !backint ) {
 
   			backint = setInterval(() => {
-  				this.velocity.z -= this.Acceleration;
+  				this.updateReverseVelocity();
   				let max = this.maxSpeed * -1;
   				this.cb( this.velocity, startTime );
           this.update();
@@ -166,7 +242,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		if ( this.velocity.x < this.maxSpeed && !rightint ) {
 
   			rightint = setInterval(() => {
-  				this.velocity.x += this.Acceleration;
+  				this.accelerateRight();
           this.cb( this.velocity, startTime );
           this.update();
 
@@ -186,7 +262,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		if ( this.velocity.x >= ( this.maxSpeed * - 1 ) && !leftint ) {
 
   			leftint = setInterval(() => {
-  				this.velocity.x -= this.Acceleration;
+  				this.accelerateLeft();
   				let max = this.maxSpeed * -1;
 
           this.cb( this.velocity, startTime );
