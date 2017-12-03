@@ -128,7 +128,7 @@ box.position.x = 500;
 velocity.z = -20;
 scene.add( box );
 
-let controls = new THREE.SpaceControls( camera );
+let controls = new THREE.SpaceControls( camera, {cb: move} );
 
 
 function animate () {
@@ -138,6 +138,7 @@ function animate () {
 	second.update();
   TWEEN.update();
 	stats.update();
+	updatePlayers();
 	box.rotation.x += 0.003;
 	box.rotation.y += 0.003;
 	analyser.getFrequencyData();

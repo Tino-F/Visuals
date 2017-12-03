@@ -163,13 +163,13 @@ THREE.SpaceControls = function ( camera, options ) {
         //
   			upint = setInterval(() => {
   				this.accelerateUp();
-          this.cb( this.velocity, startTime );
+          this.cb( this.velocity, startTime, camera.position, camera.rotation );
           this.update();
 
   				if ( this.velocity.y >= this.maxSpeed ) {
   					clearInterval( upint );
             upint = false;
-            this.cb( this.velocity, startTime );
+            this.cb( this.velocity, startTime, camera.position, camera.rotation );
             this.update();
   				}
   			}, 10);
@@ -183,13 +183,13 @@ THREE.SpaceControls = function ( camera, options ) {
   			downint = setInterval(() => {
   				this.accelerateDown();
   				let max = this.maxSpeed * -1;
-          this.cb( this.velocity, startTime );
+          this.cb( this.velocity, startTime, camera.position, camera.rotation );
           this.update();
 
   				if ( this.velocity.y <= max ) {
   					clearInterval( downint );
   					downint = false;
-            this.cb( this.velocity, startTime );
+            this.cb( this.velocity, startTime, camera.position, camera.rotation );
             this.update();
   				}
   			}, 10);
@@ -202,13 +202,13 @@ THREE.SpaceControls = function ( camera, options ) {
 
   			forwardint = setInterval(() => {
   				this.updateVelocity();
-          this.cb( this.velocity, startTime );
+          this.cb( this.velocity, startTime, camera.position, camera.rotation );
           this.update();
 
   				if ( this.velocity.z >= this.maxSpeed ) {
   					clearInterval( forwardint );
   					forwardint = false;
-            this.cb( this.velocity, startTime );
+            this.cb( this.velocity, startTime, camera.position, camera.rotation );
             this.update();
   				}
   			}, 10);
@@ -223,13 +223,13 @@ THREE.SpaceControls = function ( camera, options ) {
   			backint = setInterval(() => {
   				this.updateReverseVelocity();
   				let max = this.maxSpeed * -1;
-  				this.cb( this.velocity, startTime );
+  				this.cb( this.velocity, startTime, camera.position, camera.rotation );
           this.update();
 
   				if ( this.velocity.z <= max ) {
   					clearInterval( backint );
   					backint = false;
-            this.cb( this.velocity, startTime );
+            this.cb( this.velocity, startTime, camera.position, camera.rotation );
             this.update();
   				}
   			}, 10);
@@ -243,13 +243,13 @@ THREE.SpaceControls = function ( camera, options ) {
 
   			rightint = setInterval(() => {
   				this.accelerateRight();
-          this.cb( this.velocity, startTime );
+          this.cb( this.velocity, startTime, camera.position, camera.rotation );
           this.update();
 
   				if ( this.velocity.x >= this.maxSpeed ) {
   					clearInterval( rightint );
   					rightint = false;
-            this.cb( this.velocity, startTime );
+            this.cb( this.velocity, startTime, camera.position, camera.rotation );
             this.update();
   				}
   			}, 10);
@@ -265,13 +265,13 @@ THREE.SpaceControls = function ( camera, options ) {
   				this.accelerateLeft();
   				let max = this.maxSpeed * -1;
 
-          this.cb( this.velocity, startTime );
+          this.cb( this.velocity, startTime, camera.position, camera.rotation );
           this.update();
 
   				if ( this.velocity.x <= max ) {
   					clearInterval( leftint );
   					leftint = false;
-            this.cb( this.velocity, startTime );
+            this.cb( this.velocity, startTime, camera.position, camera.rotation );
             this.update();
   				}
   			}, 10);
@@ -288,7 +288,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		//R
   		clearInterval( upint );
   		upint = false;
-      this.cb( this.velocity, startTime );
+      this.cb( this.velocity, startTime, camera.position, camera.rotation );
       this.update();
   	}
 
@@ -296,7 +296,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		//F
   		clearInterval( downint );
   		downint = false;
-      this.cb( this.velocity, startTime );
+      this.cb( this.velocity, startTime, camera.position, camera.rotation );
       this.update();
   	}
 
@@ -304,7 +304,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		//W
   		clearInterval( forwardint );
   		forwardint = false;
-      this.cb( this.velocity, startTime );
+      this.cb( this.velocity, startTime, camera.position, camera.rotation );
       this.update();
   	}
 
@@ -312,7 +312,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		//S
   		clearInterval( backint );
   		backint = false;
-      this.cb( this.velocity, startTime );
+      this.cb( this.velocity, startTime, camera.position, camera.rotation );
       this.update();
   	}
 
@@ -320,7 +320,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		//A
   		clearInterval( leftint );
   		leftint = false;
-      this.cb( this.velocity, startTime );
+      this.cb( this.velocity, startTime, camera.position, camera.rotation );
       this.update();
   	}
 
@@ -328,7 +328,7 @@ THREE.SpaceControls = function ( camera, options ) {
   		//D
   		clearInterval( rightint );
   		rightint = false;
-      this.cb( this.velocity, startTime );
+      this.cb( this.velocity, startTime, camera.position, camera.rotation );
       this.update();
   	}
 

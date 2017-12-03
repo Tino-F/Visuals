@@ -1,4 +1,6 @@
 let MongoClient = require('mongodb').MongoClient,
+onlineUsers = {},
+online_user_array = [],
 url = 'mongodb://localhost:27017/';
 
 MongoClient.connect( url, ( err, db ) => {
@@ -11,105 +13,61 @@ MongoClient.connect( url, ( err, db ) => {
 
 });
 
-function User( socket ) {
+class Player {
 
-  return socket.handshake.session.passport.user;
+  constructor ( socket ) {
 
-};
+    this.s = socket;
+    this.user = this.s.handshake.session.passport.user;
+    this.Username = this.user.Username;
+    this.userData = {
+      FirstName: this.user.FirstName,
+      LastName: this.user.LastName,
+      Username: this.Username,
+      Color: this.user.Color,
+      StartTime: Date.now(),
+      Velocity: {
+        x: 0,
+        y: 0,
+        z: 0
+      },
+      position: {
+        x: 0,
+        y: 0,
+        z: 0
+      },
+      Score: 0
+    };
 
-function addUser ( user, s ) {
+    this.ready = () => {
 
-  MongoClient.connect( url, ( err, db ) => {
+      MongoClient.connect( url, ( err, db ) => {
 
-    if ( !err ) {
+        if ( !err ) {
 
-      let online = db.collection('Online');
-      online.find({Username: user.Username}).toArray(( err, data ) => {
-
-        if ( data.length ) {
-
-          s.emit('logout');
-          db.close();
-
-        } else {
-
-          online.insert( user, ( err, r ) => {
-
-            if ( !err ) {
-
-              s.broadcast.emit('new user', user);
-              s.emit('added', { err: false });
-              console.log( `${user.Username} has joined the server.`);
+          let online = db.collection('Online');
+          online.find({Username: this.Username}).toArray(( err, data ) => {
+            if ( data.length ) {
+              //the user is already logged in on a different device
+              this.s.emit('logout');
               db.close();
-
             } else {
+              online.insert( this.userData, ( err, r ) => {
+                if ( !err ) {
 
-              s.emit('added', { err: err });
-              db.close();
+                  this.s.broadcast.emit('new user', this.userData);
+                  console.log( `${this.Username} has joined the server.`);
+                  db.close();
 
+                } else {
+
+                  console.log( `Failed to add ${this.Username} to database.` );
+                  db.close();
+
+                }
+              });
             }
-
           });
-
-        }
-
-      });
-
-    } else {
-
-      console.log( err );
-      s.emit('added', { err: 'Internal server error.' })
-      db.close();
-
-    }
-
-  });
-
-};
-
-function removeUser ( s ) {
-
-  let user = User( s );
-
-  MongoClient.connect( url, ( err, db ) => {
-
-    if ( !err ) {
-
-      db.collection('Online').remove({Username: user.Username}, ( err, r ) => {
-
-        if ( !err ) {
-
-          console.log( `${user.Username} has left the server.`);
-          db.close();
-
-        }
-
-      });
-
-    } else {
-
-      console.log( err );
-      console.log( 'Failed to connect to server...' );
-      s.emit('added', { err: 'Internal server error.' });
-
-    }
-
-  })
-
-};
-
-function move ( user, s ) {
-
-  s.broadcast.emit('movement', user);
-
-  MongoClient.connect( url, ( err, db ) => {
-
-    if ( !err ) {
-
-      db.collection('Online').updateOne({ Username: user.Username }, user, ( err, r ) => {
-
-        if ( !err ) {
-          db.close();
         } else {
           console.log( err );
           db.close();
@@ -117,48 +75,85 @@ function move ( user, s ) {
 
       });
 
-    } else {
+    }
 
-      console.log( err );
+    this.remove = () => {
+
+      this.s.broadcast.emit('disconnect', this.userData);
+
+      MongoClient.connect( url, ( err, db ) => {
+        if ( !err ) {
+          db.collection('Online').remove({Username: this.Username}, ( err, r ) => {
+            if ( !err ) {
+              console.log( `${user.Username} has left the server.`);
+              db.close();
+            }
+          });
+        } else {
+          console.log( err );
+          console.log( 'Failed to connect to server...' );
+        }
+
+      });
 
     }
 
-  })
+    this.move = ( data ) => {
 
-};
+      this.userData.Velocity = data.Velocity;
+      this.userData.StartTime = data.StartTime;
+      this.userData.position = data.position;
+      this.userData.Rotation = data.Rotation;
+
+      this.s.broadcast.emit('player movement', this.userData);
+
+    }
+
+  }
+
+}
+
+function getUser ( socket ) {
+  return socket.handshake.session.passport.user;
+}
+
+function getUsername ( socket ) {
+  if( socket.handshake.session.passport[ 'user' ] )
+    return socket.handshake.session.passport.user.Username;
+}
 
 exports.init = ( io ) => {
 
   io.on( 'connection', s => {
 
+    let username;
+
     if ( !s.handshake.session.passport ) {
-
+      //if user got logged out
       s.emit('login');
-
     }
 
     s.on('ready', ( data ) => {
-      let user = User( s );
-      user.Velocity = data.Velocity;
-      console.log( user );
 
-      addUser( user, s );
+      username = getUsername( s );
+      onlineUsers[ username ] = new Player( s );
+      onlineUsers[ username ].ready();
+      online_user_array.push( onlineUsers[ username ] );
 
     });
 
     s.on('move', ( data ) => {
 
-      let user = User( s );
-      user.Velocity = data.Velocity;
-      console.log( user );
-      move( user, s );
+      console.log( data );
+
+      onlineUsers[ username ].move( data );
 
     });
 
-    s.on( 'disconnect', () => {
+    s.on( 'disconnect', ( data ) => {
 
-      removeUser( s );
-
+      if ( s.handshake.session.passport )
+        onlineUsers[ username ].remove();
     });
 
   });
