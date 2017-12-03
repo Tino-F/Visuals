@@ -56,6 +56,15 @@ class Player {
                 if ( !err ) {
 
                   this.s.broadcast.emit('new user', this.userData);
+
+                  let allUserData = [];
+
+                  online_user_array.forEach( ( user ) => {
+                    allUserData.push( user.userData );
+                  });
+
+                  this.s.emit('playerlist', allUserData );
+
                   console.log( `${this.Username} has joined the server.`);
                   db.close();
 
@@ -100,12 +109,19 @@ class Player {
 
     this.move = ( data ) => {
 
-      this.userData.Velocity = data.Velocity;
-      this.userData.StartTime = data.StartTime;
-      this.userData.position = data.position;
-      this.userData.Rotation = data.Rotation;
+      console.log( 'Player moved', data )
 
-      this.s.broadcast.emit('player movement', this.userData);
+      if ( data ) {
+        if ( !data.Velocity || !data.StartTime || !data.position || !data.Rotation ) {
+          this.s.emit('blank movement');
+        } else {
+          this.s.broadcast.emit('player movement', this.userData);
+          this.userData.Velocity = data.Velocity;
+          this.userData.StartTime = data.StartTime;
+          this.userData.position = data.position;
+          this.userData.Rotation = data.Rotation;
+        }
+      }
 
     }
 
@@ -113,7 +129,7 @@ class Player {
 
 }
 
-function getUser ( socket ) {
+let getUser = ( socket ) => {
   return socket.handshake.session.passport.user;
 }
 
@@ -154,6 +170,7 @@ exports.init = ( io ) => {
 
       if ( s.handshake.session.passport )
         onlineUsers[ username ].remove();
+
     });
 
   });

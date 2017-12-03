@@ -11,10 +11,10 @@ THREE.SpaceControls = function ( camera, options ) {
     forwardint,
     backint,
     endTime,
-    startTime = Date.now(),
     full_rotation = Math.PI * 2,
     mouse_prev = { x: 0, y: 0 };
 
+  this.startTime = Date.now();
   this.velocity = {
     x: 0,
     y: 0,
@@ -67,7 +67,7 @@ THREE.SpaceControls = function ( camera, options ) {
     }
 
     if ( !options.maxSpeed ) {
-      this.maxSpeed = 0.1;
+      this.maxSpeed = 1;
     } else {
       this.maxSpeed = options.maxSpeed;
     }
@@ -88,22 +88,126 @@ THREE.SpaceControls = function ( camera, options ) {
 
   });
 
+  this.checkSpeed = ( directionVector ) => {
+
+    let moveon = true;
+    let maxNegative = this.maxSpeed * -1;
+
+    console.log( 'Checking speed Vector...' );
+
+    if ( ( this.velocity.x + ( directionVector.x * this.Acceleration ) ) > this.maxSpeed ) {
+      console.log( 'X:', ( this.velocity.x + ( directionVector.x * this.Acceleration ) ) );
+      console.log( false );
+      this.velocity.x = this.maxSpeed;
+      moveon = false;
+    } else if ( ( this.velocity.y + ( directionVector.y * this.Acceleration ) ) > this.maxSpeed ) {
+      console.log( 'Y:', ( this.velocity.y + ( directionVector.y * this.Acceleration ) ) );
+      console.log( false );
+      this.velocity.y = this.maxSpeed;
+      moveon = false;
+    } else if ( ( this.velocity.z + ( directionVector.z * this.Acceleration ) ) > this.maxSpeed ) {
+      console.log( 'Z:', ( this.velocity.z + ( directionVector.z * this.Acceleration ) ) );
+      console.log( false );
+      this.velocity.z = this.maxSpeed;
+      moveon = false;
+    } else if ( ( this.velocity.x - ( directionVector.x * this.Acceleration ) ) < maxNegative ) {
+      console.log( 'X:', ( this.velocity.x - ( directionVector.x * this.Acceleration ) ) );
+      console.log( false );
+      this.velocity.x = maxNegative;
+      moveon = false;
+    } else if ( ( this.velocity.y - ( directionVector.y * this.Acceleration ) ) < maxNegative ) {
+      console.log( 'Y:', ( this.velocity.y - ( directionVector.y * this.Acceleration ) ) );
+      console.log( false );
+      this.velocity.y = maxNegative;
+      moveon = false;
+    } else if ( ( this.velocity.z - ( directionVector.z * this.Acceleration ) ) < maxNegative ) {
+      console.log( 'Z:', ( this.velocity.z - ( directionVector.z * this.Acceleration ) ) );
+      console.log( false );
+      this.velocity.z = maxNegative;
+      moveon = false;
+    }
+
+    return moveon;
+
+  }
+
+  this.checkSpeedArray = ( directionVectorArray ) => {
+
+    let moveon = true;
+    let maxNegative = this.maxSpeed * -1;
+
+    if ( ( this.velocity.x + ( directionVectorArray[0] * this.Acceleration ) ) > this.maxSpeed ) {
+
+      this.velocity.x = this.maxSpeed;
+      moveon = false;
+
+    } else if ( ( this.velocity.y + ( directionVectorArray[1] * this.Acceleration ) ) > this.maxSpeed ) {
+
+      this.velocity.y = this.maxSpeed;
+      moveon = false;
+
+    } else if ( ( this.velocity.z + ( directionVectorArray[2] * this.Acceleration ) ) > this.maxSpeed ) {
+
+      this.velocity.z = this.maxSpeed;
+      moveon = false;
+
+    } else if ( ( this.velocity.x - ( directionVectorArray[0] * this.Acceleration ) ) < maxNegative ) {
+
+      this.velocity.x = maxNegative;
+      moveon = false;
+
+    } else if ( ( this.velocity.y - ( directionVectorArray[1] * this.Acceleration ) ) < maxNegative ) {
+
+      this.velocity.y = maxNegative;
+      moveon = false;
+
+    } else if ( ( this.velocity.z - ( directionVectorArray[2] * this.Acceleration ) ) < maxNegative ) {
+
+      this.velocity.z = maxNegative;
+      moveon = false;
+
+    }
+
+    return moveon;
+
+  };
+
   this.updateVelocity = () => {
 
       let direction = this.camera.getWorldDirection();
 
-      this.velocity.x += direction.x * this.Acceleration;
-      this.velocity.y += direction.y * this.Acceleration;
-      this.velocity.z += direction.z * this.Acceleration;
+      console.log( 'Attempting to move forward' );
+      console.log( this.checkSpeed( direction ) );
+
+      if( this.checkSpeed( direction ) ) {
+
+        console.log( 'You are below your maximum speed. Accelerating.' );
+
+        this.velocity.x += direction.x * this.Acceleration;
+        this.velocity.y += direction.y * this.Acceleration;
+        this.velocity.z += direction.z * this.Acceleration;
+        this.cb( { Velocity: this.velocity, startTime: this.startTime, position: camera.position, Rotation: camera.rotation });
+        this.update();
+
+        console.log( this.velocity );
+
+      }
 
   };
 
   this.updateReverseVelocity = () => {
     let direction = this.camera.getWorldDirection();
 
-    this.velocity.x -= direction.x * this.Acceleration;
-    this.velocity.y -= direction.y * this.Acceleration;
-    this.velocity.z -= direction.z * this.Acceleration;
+    if( this.checkSpeed( direction ) ) {
+
+      this.velocity.x -= direction.x * this.Acceleration;
+      this.velocity.y -= direction.y * this.Acceleration;
+      this.velocity.z -= direction.z * this.Acceleration;
+      this.cb( { Velocity: this.velocity, startTime: this.startTime, position: camera.position, Rotation: camera.rotation });
+      this.update();
+
+    }
+
   };
 
   this.accelerateUp = () => {
@@ -112,9 +216,15 @@ THREE.SpaceControls = function ( camera, options ) {
     let rightcross = math.cross( [direction.x, direction.y, direction.z], [0, 1, 0] );
     let upcross = math.cross( rightcross, [direction.x, direction.y, direction.z] );
 
-    this.velocity.x -= upcross[0] * this.Acceleration;
-    this.velocity.y -= upcross[1] * this.Acceleration;
-    this.velocity.z -= upcross[2] * this.Acceleration;
+    if ( this.checkSpeedArray( upcross ) ) {
+
+      this.velocity.x -= upcross[0] * this.Acceleration;
+      this.velocity.y -= upcross[1] * this.Acceleration;
+      this.velocity.z -= upcross[2] * this.Acceleration;
+      this.cb( { Velocity: this.velocity, startTime: this.startTime, position: camera.position, Rotation: camera.rotation });
+      this.update();
+
+    }
 
   }
 
@@ -124,9 +234,15 @@ THREE.SpaceControls = function ( camera, options ) {
     let rightcross = math.cross( [direction.x, direction.y, direction.z], [0, 1, 0] );
     let upcross = math.cross( rightcross, [direction.x, direction.y, direction.z] );
 
-    this.velocity.x += upcross[0] * this.Acceleration;
-    this.velocity.y += upcross[1] * this.Acceleration;
-    this.velocity.z += upcross[2] * this.Acceleration;
+    if ( this.checkSpeedArray( upcross ) ) {
+
+      this.velocity.x += upcross[0] * this.Acceleration;
+      this.velocity.y += upcross[1] * this.Acceleration;
+      this.velocity.z += upcross[2] * this.Acceleration;
+      this.cb( { Velocity: this.velocity, startTime: this.startTime, position: camera.position, Rotation: camera.rotation });
+      this.update();
+
+    }
 
   }
 
@@ -135,9 +251,15 @@ THREE.SpaceControls = function ( camera, options ) {
     let direction = this.camera.getWorldDirection();
     let rightcross = math.cross( [direction.x, direction.y, direction.z], [0, 1, 0] );
 
-    this.velocity.x -= rightcross[0] * this.Acceleration;
-    this.velocity.y -= rightcross[1] * this.Acceleration;
-    this.velocity.z -= rightcross[2] * this.Acceleration;
+    if ( this.checkSpeedArray( rightcross ) ) {
+
+      this.velocity.x -= rightcross[0] * this.Acceleration;
+      this.velocity.y -= rightcross[1] * this.Acceleration;
+      this.velocity.z -= rightcross[2] * this.Acceleration;
+      this.cb( { Velocity: this.velocity, startTime: this.startTime, position: camera.position, Rotation: camera.rotation });
+      this.update();
+
+    }
 
   }
 
@@ -146,134 +268,114 @@ THREE.SpaceControls = function ( camera, options ) {
     let direction = this.camera.getWorldDirection();
     let rightcross = math.cross( [direction.x, direction.y, direction.z], [0, 1, 0] );
 
-    this.velocity.x += rightcross[0] * this.Acceleration;
-    this.velocity.y += rightcross[1] * this.Acceleration;
-    this.velocity.z += rightcross[2] * this.Acceleration;
+    if ( this.checkSpeedArray( rightcross ) ) {
+
+      this.velocity.x += rightcross[0] * this.Acceleration;
+      this.velocity.y += rightcross[1] * this.Acceleration;
+      this.velocity.z += rightcross[2] * this.Acceleration;
+      this.cb( { Velocity: this.velocity, startTime: this.startTime, position: camera.position, Rotation: camera.rotation });
+      this.update();
+
+    }
 
   }
 
-  document.addEventListener('keydown', ( e ) => {
+  document.addEventListener('keydown', ( evnt ) => {
 
-  	let evnt = window.event ? window.event : e;
+  	//let evnt = window.event ? window.event : e;
 
-  	if ( evnt.keyCode == 70 ) {
+    let negativeMax = this.maxSpeed * -1;
+
+    switch ( evnt.keyCode ) {
+      case 70:
+        console.log('R down');
+      case 82:
+        console.log('F down');
+      case 87:
+        console.log('W down');
+      case 83:
+        console.log('S down');
+      case 68:
+        console.log('D down');
+      case 65:
+        console.log('A down');
+    };
+
+  	if ( evnt.keyCode === 70 ) {
   		//R
 
-  		if ( this.velocity.y < this.maxSpeed && !upint ) {
-        //
+  		if ( !upint ) {
+        //if the button isn't already being pressed
   			upint = setInterval(() => {
-  				this.accelerateUp();
-          this.cb( this.velocity, startTime, camera.position, camera.rotation );
-          this.update();
 
-  				if ( this.velocity.y >= this.maxSpeed ) {
-  					clearInterval( upint );
-            upint = false;
-            this.cb( this.velocity, startTime, camera.position, camera.rotation );
-            this.update();
-  				}
-  			}, 10);
+          this.accelerateUp();
+
+        }, 10);
+
   		}
 
   	}
 
-  	if ( evnt.keyCode == 82 ) {
+  	if ( evnt.keyCode === 82 ) {
   		//F
-  		if ( this.velocity.y > ( this.maxSpeed * -1 ) && !downint ) {
-  			downint = setInterval(() => {
-  				this.accelerateDown();
-  				let max = this.maxSpeed * -1;
-          this.cb( this.velocity, startTime, camera.position, camera.rotation );
-          this.update();
+  		if ( !downint ) {
 
-  				if ( this.velocity.y <= max ) {
-  					clearInterval( downint );
-  					downint = false;
-            this.cb( this.velocity, startTime, camera.position, camera.rotation );
-            this.update();
-  				}
+  			downint = setInterval(() => {
+
+  				this.accelerateDown();
+
   			}, 10);
+
   		}
   	}
 
-  	if ( evnt.keyCode == 87 ) {
+  	if ( evnt.keyCode === 87 ) {
   		//W
-  		if ( this.velocity.z < this.maxSpeed && !forwardint ) {
+  		if ( !forwardint ) {
 
   			forwardint = setInterval(() => {
-  				this.updateVelocity();
-          this.cb( this.velocity, startTime, camera.position, camera.rotation );
-          this.update();
 
-  				if ( this.velocity.z >= this.maxSpeed ) {
-  					clearInterval( forwardint );
-  					forwardint = false;
-            this.cb( this.velocity, startTime, camera.position, camera.rotation );
-            this.update();
-  				}
+          this.updateVelocity();
+
   			}, 10);
 
   		}
   	}
 
-  	if( evnt.keyCode == 83 ) {
+  	if( evnt.keyCode === 83 ) {
   		//S
-  		if ( this.velocity.z >= ( this.maxSpeed * - 1 ) && !backint ) {
+  		if ( !backint ) {
 
   			backint = setInterval(() => {
-  				this.updateReverseVelocity();
-  				let max = this.maxSpeed * -1;
-  				this.cb( this.velocity, startTime, camera.position, camera.rotation );
-          this.update();
 
-  				if ( this.velocity.z <= max ) {
-  					clearInterval( backint );
-  					backint = false;
-            this.cb( this.velocity, startTime, camera.position, camera.rotation );
-            this.update();
-  				}
+          this.updateReverseVelocity();
+
   			}, 10);
 
   		}
   	}
 
-  	if ( evnt.keyCode == 68 ) {
+  	if ( evnt.keyCode === 68 ) {
   		//D
-  		if ( this.velocity.x < this.maxSpeed && !rightint ) {
+  		if ( !rightint ) {
 
   			rightint = setInterval(() => {
-  				this.accelerateRight();
-          this.cb( this.velocity, startTime, camera.position, camera.rotation );
-          this.update();
 
-  				if ( this.velocity.x >= this.maxSpeed ) {
-  					clearInterval( rightint );
-  					rightint = false;
-            this.cb( this.velocity, startTime, camera.position, camera.rotation );
-            this.update();
-  				}
+          this.accelerateRight();
+
   			}, 10);
 
   		}
   	}
 
-  	if( evnt.keyCode == 65 ) {
+  	if( evnt.keyCode === 65 ) {
   		//A
-  		if ( this.velocity.x >= ( this.maxSpeed * - 1 ) && !leftint ) {
+  		if ( !leftint ) {
 
   			leftint = setInterval(() => {
-  				this.accelerateLeft();
-  				let max = this.maxSpeed * -1;
 
-          this.cb( this.velocity, startTime, camera.position, camera.rotation );
-          this.update();
+          this.accelerateLeft();
 
-  				if ( this.velocity.x <= max ) {
-  					clearInterval( leftint );
-  					leftint = false;
-            this.cb( this.velocity, startTime, camera.position, camera.rotation );
-            this.update();
-  				}
   			}, 10);
 
   		}
@@ -281,66 +383,77 @@ THREE.SpaceControls = function ( camera, options ) {
 
   });
 
-  document.addEventListener('keyup', ( e ) => {
-  	let evnt = window.event ? window.event : e;
+  document.addEventListener('keyup', ( evnt ) => {
+  	//let evnt = window.event ? window.event : e;
 
-  	if ( evnt.keyCode == 70 ) {
+    console.log( evnt.keyCode );
+
+    switch ( evnt.keyCode ) {
+      case 70:
+        console.log('R up');
+      case 82:
+        console.log('F up');
+      case 87:
+        console.log('W up');
+      case 83:
+        console.log('S up');
+      case 68:
+        console.log('D up');
+      case 65:
+        console.log('A up');
+    };
+
+  	if ( evnt.keyCode === 70 ) {
   		//R
   		clearInterval( upint );
   		upint = false;
-      this.cb( this.velocity, startTime, camera.position, camera.rotation );
-      this.update();
+
   	}
 
-  	if( evnt.keyCode == 82 ) {
+  	if( evnt.keyCode === 82 ) {
   		//F
   		clearInterval( downint );
   		downint = false;
-      this.cb( this.velocity, startTime, camera.position, camera.rotation );
-      this.update();
+
   	}
 
-  	if ( evnt.keyCode == 87 ) {
+  	if ( evnt.keyCode === 87 ) {
   		//W
   		clearInterval( forwardint );
   		forwardint = false;
-      this.cb( this.velocity, startTime, camera.position, camera.rotation );
-      this.update();
+
   	}
 
-  	if( evnt.keyCode == 83 ) {
+  	if( evnt.keyCode === 83 ) {
   		//S
   		clearInterval( backint );
   		backint = false;
-      this.cb( this.velocity, startTime, camera.position, camera.rotation );
-      this.update();
+
   	}
 
-  	if( evnt.keyCode == 65 ) {
+  	if( evnt.keyCode === 65 ) {
   		//A
   		clearInterval( leftint );
   		leftint = false;
-      this.cb( this.velocity, startTime, camera.position, camera.rotation );
-      this.update();
+
   	}
 
-  	if( evnt.keyCode == 68 ) {
+  	if( evnt.keyCode === 68 ) {
   		//D
   		clearInterval( rightint );
   		rightint = false;
-      this.cb( this.velocity, startTime, camera.position, camera.rotation );
-      this.update();
+
   	}
 
   });
 
   this.update = () => {
 
-    let timeDifference = Date.now() - startTime;
+    let timeDifference = Date.now() - this.startTime;
     camera.position.x += timeDifference * this.velocity.x;
     camera.position.y += timeDifference * this.velocity.y;
     camera.position.z += timeDifference * this.velocity.z;
-    startTime = Date.now();
+    this.startTime = Date.now();
 
   }
 

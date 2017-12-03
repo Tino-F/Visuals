@@ -6,6 +6,8 @@ class Player {
 
   constructor ( playerData ) {
 
+    console.log( 'New player', playerData );
+
     this.Username = playerData.Username;
     this.firstName = playerData.FirstName;
     this.lastName = playerData.LastName;
@@ -27,10 +29,11 @@ class Player {
     this.update = () => {
 
       let timeDifference = Date.now() - this.StartTime;
-      console.log( timeDifference, this.Velocity );
+      //console.log( timeDifference, this.Velocity, this.model.position );
       this.model.position.x += timeDifference * this.Velocity.x;
       this.model.position.y += timeDifference * this.Velocity.y;
       this.model.position.z += timeDifference * this.Velocity.z;
+      this.StartTime = Date.now();
 
     }
 
@@ -38,22 +41,11 @@ class Player {
 
 }
 
-function move ( Velocity, StartTime, position, rotation ) {
+function move ( data ) {
 
-  server.emit('move', {
-    Velocity: Velocity,
-    StartTime: StartTime,
-    position: {
-      x: position.x,
-      y: position.y,
-      z: position.z
-    },
-    Rotation: {
-      x: rotation.x,
-      y: rotation.y,
-      z: rotation.z
-    }
-  });
+  console.log( 'Sending', data );
+
+  server.emit('move', data );
 
 };
 
@@ -67,12 +59,15 @@ function updatePlayers() {
 
 server.on('player movement', ( user ) => {
 
+  console.log( 'Players moved:', user );
+
   users[ user.Username ].Velocity = user.Velocity;
   users[ user.Username ].StartTime = user.StartTime;
   users[ user.Username ].model.position.x = user.position.x;
   users[ user.Username ].model.position.y = user.position.y;
   users[ user.Username ].model.position.z = user.position.z;
-  users[ user.Username ].model.rotation.set( user.Rotation );
+  users[ user.Username ].StartTime = Date.now();
+  users[ user.Username ].update();
 
 });
 
@@ -82,6 +77,30 @@ server.on('new user', ( user ) => {
   user_array.push( users[ user.Username ] );
 
 });
+
+server.on('blank movement', () => {
+  server.emit('move', {
+    Velocity: controls.velocity,
+    StartTime: controls.startTime,
+    position: {
+      x: camera.position.x,
+      y: camera.position.y,
+      z: camera.position.z
+    },
+    Rotation: {
+      x: camera.rotation.x,
+      y: camera.rotation.y,
+      z: camera.rotation.z
+    }
+  });
+});
+
+server.on('playerlist', ( players ) => {
+  players.forEach( ( player ) => {
+    users[ player.Username ] = new Player( player );
+    user_array.push( users[ player.Username ] );
+  })
+})
 
 server.on('logout', () => {
   window.location = '/logout';
