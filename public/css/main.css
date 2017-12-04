@@ -118,7 +118,7 @@ canvas {
 .login {
   color: white;
   background: url('/imgs/space2.jpeg');
-   background-size: 80%;
+   background-size: 100%;
 }
 
 .login > #center > a {
