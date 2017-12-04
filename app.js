@@ -93,7 +93,7 @@ app.post('/register', ( req, res ) => {
 })
 
 const server = require( 'http' ).Server( app );
-const io = require( 'socket.io' )( server );
+const io = require( 'socket.io' )( server, { wsEngine: 'ws' } );
 server.listen( port );
 console.log( `Listening on port ${port}.` );
 

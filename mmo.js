@@ -13,11 +13,18 @@ MongoClient.connect( url, ( err, db ) => {
 
 });
 
+function getTime () {
+  let now = new Date();
+  let now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),  now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getMilliseconds());
+  return now_utc.getTime();
+}
+
 class Player {
 
   constructor ( socket ) {
 
     this.s = socket;
+    this.index;
     this.user = this.s.handshake.session.passport.user;
     this.Username = this.user.Username;
     this.userData = {
@@ -25,7 +32,7 @@ class Player {
       LastName: this.user.LastName,
       Username: this.Username,
       Color: this.user.Color,
-      StartTime: Date.now(),
+      StartTime: getTime(),
       Velocity: {
         x: 0,
         y: 0,
@@ -60,7 +67,9 @@ class Player {
                   let allUserData = [];
 
                   online_user_array.forEach( ( user ) => {
-                    allUserData.push( user.userData );
+                    if ( user.Username !== this.Username ) {
+                      allUserData.push( user.userData );
+                    }
                   });
 
                   this.s.emit('playerlist', allUserData );
@@ -86,16 +95,27 @@ class Player {
 
     }
 
-    this.remove = () => {
+    this.disconnect = ( io ) => {
 
-      this.s.broadcast.emit('disconnect', this.userData);
+      io.emit('disconnect', this.userData);
 
       MongoClient.connect( url, ( err, db ) => {
         if ( !err ) {
           db.collection('Online').remove({Username: this.Username}, ( err, r ) => {
             if ( !err ) {
-              console.log( `${user.Username} has left the server.`);
+              console.log( `${this.Username} has left the server.`);
+
+              let newUserArray = [];
+
+              online_user_array.forEach( ( user ) => {
+                if ( user.Username != this.Username )
+                  newUserArray.push( user );
+              });
+
+              online_user_array = newUserArray;
+              onlineUsers[ this.Username ] = false;
               db.close();
+
             }
           });
         } else {
@@ -133,7 +153,7 @@ let getUser = ( socket ) => {
   return socket.handshake.session.passport.user;
 }
 
-function getUsername ( socket ) {
+let getUsername = ( socket ) => {
   if( socket.handshake.session.passport[ 'user' ] )
     return socket.handshake.session.passport.user.Username;
 }
@@ -160,16 +180,18 @@ exports.init = ( io ) => {
 
     s.on('move', ( data ) => {
 
-      console.log( data );
-
-      onlineUsers[ username ].move( data );
+      if ( !onlineUsers[ username ] ) {
+        s.emit('login');
+      } else {
+        onlineUsers[ username ].move( data );
+      }
 
     });
 
-    s.on( 'disconnect', ( data ) => {
+    s.on( 'disconnect', () => {
 
       if ( s.handshake.session.passport )
-        onlineUsers[ username ].remove();
+        onlineUsers[ username ].disconnect( io );
 
     });
 
