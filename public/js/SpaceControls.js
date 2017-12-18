@@ -12,7 +12,8 @@ THREE.SpaceControls = function ( camera, options ) {
     backint,
     endTime,
     full_rotation = Math.PI * 2,
-    mouse_prev = { x: 0, y: 0 };
+    mouse_prev = { x: 0, y: 0 },
+    reverse = true;
 
   this.velocity = {
     x: 0,
@@ -21,7 +22,7 @@ THREE.SpaceControls = function ( camera, options ) {
   };
 
   this.camera = camera;
-  this.camera.rotation.order = 'YXZ';
+  this.camera.rotation.order = 'XYZ';
 
   //Set paramaters to class variables and set default values
   //Sensitivity, lookSensitivity, cb, and Acceleration
@@ -57,7 +58,7 @@ THREE.SpaceControls = function ( camera, options ) {
 
     if ( !options.Acceleration ) {
 
-      this.Acceleration = 0.005;
+      this.Acceleration = 0.001;
 
     } else {
 
@@ -103,38 +104,20 @@ THREE.SpaceControls = function ( camera, options ) {
     console.log( 'Checking speed Vector...' );
 
     if ( ( this.velocity.x + ( directionVector.x * this.Acceleration ) ) > this.maxSpeed ) {
-      console.log( 'X:', ( this.velocity.x + ( directionVector.x * this.Acceleration ) ) );
-      console.log( false );
-      this.velocity.x = this.maxSpeed;
       moveon = false;
     } else if ( ( this.velocity.y + ( directionVector.y * this.Acceleration ) ) > this.maxSpeed ) {
-      console.log( 'Y:', ( this.velocity.y + ( directionVector.y * this.Acceleration ) ) );
-      console.log( false );
-      this.velocity.y = this.maxSpeed;
       moveon = false;
     } else if ( ( this.velocity.z + ( directionVector.z * this.Acceleration ) ) > this.maxSpeed ) {
-      console.log( 'Z:', ( this.velocity.z + ( directionVector.z * this.Acceleration ) ) );
-      console.log( false );
-      this.velocity.z = this.maxSpeed;
       moveon = false;
     } else if ( ( this.velocity.x - ( directionVector.x * this.Acceleration ) ) < maxNegative ) {
-      console.log( 'X:', ( this.velocity.x - ( directionVector.x * this.Acceleration ) ) );
-      console.log( false );
-      this.velocity.x = maxNegative;
-      moveon = false;
+      moveon = false
     } else if ( ( this.velocity.y - ( directionVector.y * this.Acceleration ) ) < maxNegative ) {
-      console.log( 'Y:', ( this.velocity.y - ( directionVector.y * this.Acceleration ) ) );
-      console.log( false );
-      this.velocity.y = maxNegative;
-      moveon = false;
-    } else if ( ( this.velocity.z - ( directionVector.z * this.Acceleration ) ) < maxNegative ) {
-      console.log( 'Z:', ( this.velocity.z - ( directionVector.z * this.Acceleration ) ) );
-      console.log( false );
-      this.velocity.z = maxNegative;
+      moveon = false
+    } else if ( ( this.velocity.x - ( directionVector.z * this.Acceleration ) ) < maxNegative ) {
       moveon = false;
     }
 
-    return moveon;
+    return true;
 
   }
 
@@ -175,7 +158,7 @@ THREE.SpaceControls = function ( camera, options ) {
 
     }
 
-    return moveon;
+    return true;
 
   };
 
@@ -300,7 +283,11 @@ THREE.SpaceControls = function ( camera, options ) {
         //if the button isn't already being pressed
   			upint = setInterval(() => {
 
-          this.accelerateUp();
+          if ( reverse ) {
+            this.accelerateDown();
+          } else {
+            this.accelerateUp();
+          }
 
         }, 10);
 
@@ -314,7 +301,11 @@ THREE.SpaceControls = function ( camera, options ) {
 
   			downint = setInterval(() => {
 
-  				this.accelerateDown();
+          if ( reverse ) {
+            this.accelerateUp();
+          } else {
+            this.accelerateDown();
+          }
 
   			}, 10);
 
@@ -353,7 +344,11 @@ THREE.SpaceControls = function ( camera, options ) {
 
   			rightint = setInterval(() => {
 
-          this.accelerateRight();
+          if ( reverse ) {
+            this.accelerateLeft();
+          } else {
+            this.accelerateRight();
+          }
 
   			}, 10);
 
@@ -366,7 +361,11 @@ THREE.SpaceControls = function ( camera, options ) {
 
   			leftint = setInterval(() => {
 
-          this.accelerateLeft();
+          if ( reverse ) {
+            this.accelerateRight();
+          } else {
+            this.accelerateLeft();
+          }
 
   			}, 10);
 

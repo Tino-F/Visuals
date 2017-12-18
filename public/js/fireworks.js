@@ -1,6 +1,8 @@
 let size = 15;
 let playing = false;
+let effect = false;
 let title = document.getElementById('title');
+let vr_choice = document.getElementById('vr');
 let loading = document.getElementById('loading');
 let progress = document.getElementById('progress');
 let acceleration = document.getElementById('acceleration');
@@ -48,15 +50,7 @@ audioLoader.load( 'music/sad.mp3', ( buffer ) => {
 
 	});
 
-  let fade_int = setInterval(() => {
-		if ( title.style.opacity >= 0 ) {
-			title.style.opacity -= 0.05;
-		} else {
-			sound.play();
-			title.remove();
-			clearInterval( fade_int );
-		}
-	}, 10);
+  title.remove();
 
 }, ( xhr ) => {
 	//load progress function
@@ -74,6 +68,30 @@ audioLoader.load( 'music/sad.mp3', ( buffer ) => {
 let analyser = new THREE.AudioAnalyser( sound, 128 );
 
 document.body.append( renderer.domElement );
+
+function select_vr( bool ) {
+
+	if( bool ) {
+		//VR turned on
+
+		effect = new THREE.StereoEffect( renderer );
+		effect.setSize( window.innerWidth, window.innerHeight );
+
+	}
+
+	vr_choice.style.opacity = 1;
+
+	let fade_int = setInterval(() => {
+		if ( vr_choice.style.opacity >= 0 ) {
+			vr_choice.style.opacity -= 0.05;
+		} else {
+			vr_choice.remove();
+			clearInterval( fade_int );
+			sound.play();
+		}
+	}, 10);
+
+}
 
 function random ( min, max, sign ) {
   let rn = Math.floor((Math.random() * max) + min);
@@ -144,7 +162,11 @@ function animate () {
 	analyser.getFrequencyData();
 	let s = analyser.getAverageFrequency() / 100;
 	if ( playing ) { box.scale.set( s, s, s ) };
-	renderer.render( scene, camera );
+	if ( !effect ) {
+		renderer.render( scene, camera );
+	} else {
+		effect.render( scene, camera );
+	}
   requestAnimationFrame( animate );
 };
 

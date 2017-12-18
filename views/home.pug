@@ -12,7 +12,8 @@ html
     script(src='/js/stats.min.js')
     script(src='js/Tween.js')
     script(src='/socket.io/socket.io.js')
-    script(src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.17.0/math.min.js')
+    script(src='js/math.min.js')
+    script(src='js/StereoEffect.js')
   body
     div#title(align='center')
       div
@@ -29,10 +30,21 @@ html
         div#loading_bar
           div#progress
 
+    div#vr(align='center')
+      div#vr_inner
+        h1 Would you like to view in VR mode?
+        br
+        br
+        div(onclick='select_vr(true)') Yes
+        div(onclick='select_vr(false)') No
+
     div.crosshairs(align='center')
       div.horizontal
       div.vertical
 
+    div#controlMenu(align='center')
+
+    script(src='/js/menu-options.js')
     script(src='/js/mmo_client.js')
     script(src='/js/fireworks.js')
     script(src='/js/keyboard_controler.js')
