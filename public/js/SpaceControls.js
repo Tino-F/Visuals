@@ -13,7 +13,7 @@ THREE.SpaceControls = function ( camera, options ) {
     endTime,
     full_rotation = Math.PI * 2,
     mouse_prev = { x: 0, y: 0 },
-    reverse = true;
+    reverse = false;
 
   this.velocity = {
     x: 0,

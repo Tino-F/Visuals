@@ -65,6 +65,35 @@ audioLoader.load( 'music/sad.mp3', ( buffer ) => {
 
 });
 
+function load_song ( url ) {
+
+	audioLoader.load( url, ( buffer ) => {
+		//initial audio load function
+		sound.setBuffer( buffer );
+		sound.setLoop(true);
+		sound.setRefDistance( 500 );
+		sound.setVolume(1);
+	  title.style.opacity = 1;
+		sound.stop();
+		sound.play();
+		playing = true;
+
+	}, ( xhr ) => {
+		//load progress function
+		let perc = (xhr.loaded / xhr.total * 100);
+		let loaded = 'Loading ' + url + ': ' + Math.floor(perc) + '%';
+		console.log( loaded )
+
+	}, ( err ) => {
+		//Error function
+
+		console.log( 'Failed to load: ' + url );
+		console.log( err )
+
+	});
+
+}
+
 let analyser = new THREE.AudioAnalyser( sound, 128 );
 
 document.body.append( renderer.domElement );
