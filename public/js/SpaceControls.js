@@ -11,9 +11,11 @@ THREE.SpaceControls = function ( camera, options ) {
     forwardint,
     backint,
     endTime,
+    locked,
     full_rotation = Math.PI * 2,
-    mouse_prev = { x: 0, y: 0 },
-    reverse = false;
+    mouse_prev = { x: 0, y: 0 };
+
+  this.reverse = false;
 
   this.velocity = {
     x: 0,
@@ -84,15 +86,44 @@ THREE.SpaceControls = function ( camera, options ) {
 
   //Camera rotation algorithm on mouse movement
 
-  document.addEventListener('mousemove', ( evnt ) => {
+  renderer.domElement.requestPointerLock = renderer.domElement.requestPointerLock || renderer.domElement.mozRequestPointerLock;
 
-      let e = window.event ? window.event : evnt;
+  renderer.domElement.addEventListener('click', () => { renderer.domElement.requestPointerLock() } );
 
+  if ("onpointerlockchange" in document) {
 
-    	this.camera.rotation.x += ( ( mouse_prev.y - e.clientY ) * 0.01 ) * this.Sensitivity;
-    	this.camera.rotation.y += ( ( mouse_prev.x - e.clientX ) * -0.01 ) * this.Sensitivity;
+    document.addEventListener('pointerlockchange', lockChangeAlert, false);
 
-    	mouse_prev = {x: e.clientX, y: e.clientY};
+  } else if ("onmozpointerlockchange" in document) {
+
+    document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+
+  }
+
+  function lockChangeAlert() {
+
+    if(document.pointerLockElement === renderer.domElement || document.mozPointerLockElement === renderer.domElement) {
+
+      locked = true;
+
+    } else {
+
+      locked = false;
+
+    }
+
+  }
+
+  renderer.domElement.addEventListener('mousemove', ( evnt ) => {
+
+      if ( locked ) {
+
+        let e = window.event ? window.event : evnt;
+
+      	this.camera.rotation.x += ( e.movementY * 0.01 ) * this.Sensitivity;
+      	this.camera.rotation.y += ( e.movementX * -0.01 ) * this.Sensitivity;
+
+      }
 
   });
 
@@ -283,7 +314,7 @@ THREE.SpaceControls = function ( camera, options ) {
         //if the button isn't already being pressed
   			upint = setInterval(() => {
 
-          if ( reverse ) {
+          if ( this.reverse ) {
             this.accelerateDown();
           } else {
             this.accelerateUp();
@@ -301,7 +332,7 @@ THREE.SpaceControls = function ( camera, options ) {
 
   			downint = setInterval(() => {
 
-          if ( reverse ) {
+          if ( this.reverse ) {
             this.accelerateUp();
           } else {
             this.accelerateDown();
@@ -344,7 +375,7 @@ THREE.SpaceControls = function ( camera, options ) {
 
   			rightint = setInterval(() => {
 
-          if ( reverse ) {
+          if ( this.reverse ) {
             this.accelerateLeft();
           } else {
             this.accelerateRight();
@@ -361,7 +392,7 @@ THREE.SpaceControls = function ( camera, options ) {
 
   			leftint = setInterval(() => {
 
-          if ( reverse ) {
+          if ( this.reverse ) {
             this.accelerateRight();
           } else {
             this.accelerateLeft();

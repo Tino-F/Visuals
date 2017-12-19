@@ -1,6 +1,7 @@
 'use strict';
 let express = require('express'),
 path = require('path'),
+sassMiddleware = require('node-sass-middleware'),
 bodyParser = require('body-parser'),
 cookieParser = require('cookie-parser'),
 passport = require('passport'),
@@ -16,13 +17,22 @@ let session = expresssession({
   saveUninitialized: false
 });
 
-app.use( express.static( path.join( __dirname, 'public' ) ) );
 app.use( cookieParser() );
 app.use( bodyParser.urlencoded( { extended: false } ) );
 app.use( session );
 app.use( passport.initialize() );
 app.use( passport.session() );
 app.set('view engine', 'pug');
+app.use(sassMiddleware({
+  src: path.join( __dirname, '/scss' ),
+  dest: __dirname + '/public/css',
+  debug: true,
+  outputStyle: 'compressed',
+  prefix: '/css',
+  response: false,
+  error: ( err ) => console.log( err )
+}));
+app.use( express.static( path.join( __dirname, 'public' ) ) );
 
 let backend = require('./backend.js');
 

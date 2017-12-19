@@ -1,4 +1,4 @@
-let size = 15;
+let size = 1;
 let playing = false;
 let effect = false;
 let title = document.getElementById('title');
@@ -135,21 +135,21 @@ let first = new LorenzAttractor({
 	a: 512 * mx,
 	b: 3072 * mx,
 	c: 128 * mx,
-	t: 0.00009,
+	t: 0.00004,
 	offset: { x: -80, y: 0, z: -100 },
 	colors: [
 		{ pct: 0, color: { r: 0x41, g: 0xf4, b: 0xc4 } },
 		{ pct: 0.5, color: { r: 0x4e, g: 0x42, b: 0xf4 } },
 	  { pct: 1, color: { r: 0xe5, g: 0x42, b: 0xf4 } }
 	],
-	pointSize: size,
+	pointSize: 8,
 	analyser: analyser
-}, 50000);
+}, 100000);
 
 let second = new HalvorsenAttractor({
 	b: 0.208186,
 	t: 1.5,
-	scale: 30000,
+	scale: 20000,
 	offset: {x: 0, y: 3000, z: 500},
 	initial: {x: 1000, y: 222, z: 456},
 	colors: [
@@ -157,9 +157,9 @@ let second = new HalvorsenAttractor({
 		{ pct: 0.5, color: { r: 0x41, g: 0xf4, b: 0x68 } },
   	{ pct: 1, color: { r: 0x41, g: 0xdf, b: 0xf4 } }
 	],
-	pointSize: size,
+	pointSize: 50,
 	analyser: analyser
-}, 40000);
+}, 100000);
 
 scene.add( first.fractal );
 scene.add( second.fractal );
