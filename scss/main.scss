@@ -154,7 +154,22 @@ canvas {
 .login {
   color: white;
   background: url('/imgs/gradient_red_blue.jpg');
-   background-size: 100%;
+  background-size: 100%;
+
+  h1 {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    width: 500px;
+    border-bottom: 1px solid white;
+  }
+
+  #center {
+    position: absolute;
+    width: 100%;
+    bottom: calc(50vh - 120px);
+    height: 300px;
+  }
+
 }
 
 .login-form {
