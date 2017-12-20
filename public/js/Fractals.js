@@ -129,7 +129,7 @@ class LorenzAttractor {
 		this.x = this.x + dx;
 		this.y = this.y + dy;
 		this.z = this.z + dz;
-		return {x: this.x + this.origin.x, y: this.y + this.origin.y, z: this.z + this.origin.z};
+		return {x: (this.x + this.origin.x) * this.scale, y: (this.y + this.origin.y) * this.scale, z: (this.z + this.origin.z) * this.scale};
 	}
 
 	update () {
@@ -170,6 +170,7 @@ class LorenzAttractor {
 		this.c = options.c;
 		this.t = options.t;
 		this.dt = options.t;
+    this.scale = options.scale || 1;
 		this.x = 1;
 		this.y = 1;
 		this.z = 1;

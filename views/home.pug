@@ -38,11 +38,29 @@ html
         div(onclick='select_vr(true)') Yes
         div(onclick='select_vr(false)') No
 
-    div.crosshairs(align='center')
+    div#crosshairs(align='center')
       div.horizontal
       div.vertical
 
     div#controlMenu(align='center')
+      div.main
+      div.menuBar
+      div.menuBar
+      div.menuBar
+      div.guns
+      div.music
+      div.settings
+
+    //
+      div#begin
+        div(align='center')
+          h1 Click here to begin
+          p W = Forward
+          p S = Reverse
+          p A = Left
+          p D = Right
+          p R = Up
+          p F = Down
 
     script(src='/js/menu-options.js')
     script(src='/js/mmo_client.js')

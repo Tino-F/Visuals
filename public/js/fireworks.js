@@ -105,6 +105,7 @@ function select_vr( bool ) {
 
 		effect = new THREE.StereoEffect( renderer );
 		effect.setSize( window.innerWidth, window.innerHeight );
+		document.getElementById('crosshairs').remove();
 
 	}
 
@@ -129,14 +130,13 @@ function random ( min, max, sign ) {
   return rn;
 };
 
-let mx = 1.8;
-
 let first = new LorenzAttractor({
-	a: 512 * mx,
-	b: 3072 * mx,
-	c: 128 * mx,
-	t: 0.00004,
+	a: 512,
+	b: 3072,
+	c: 128,
+	t: 0.00005,
 	offset: { x: -80, y: 0, z: -100 },
+	scale: 1.8,
 	colors: [
 		{ pct: 0, color: { r: 0x41, g: 0xf4, b: 0xc4 } },
 		{ pct: 0.5, color: { r: 0x4e, g: 0x42, b: 0xf4 } },

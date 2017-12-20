@@ -24,7 +24,7 @@ THREE.SpaceControls = function ( camera, options ) {
   };
 
   this.camera = camera;
-  this.camera.rotation.order = 'XYZ';
+  this.camera.rotation.order = 'YXZ';
 
   //Set paramaters to class variables and set default values
   //Sensitivity, lookSensitivity, cb, and Acceleration
