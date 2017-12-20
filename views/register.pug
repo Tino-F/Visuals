@@ -4,7 +4,7 @@ html
     script(src="https://code.jquery.com/jquery-3.2.1.min.js", integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=", crossorigin="anonymous")
     link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css", integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u", crossorigin="anonymous")
     script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa", crossorigin="anonymous")
-    link(rel='stylesheet', href='css/main.css')
+    link(rel='stylesheet', href='/css/main.css')
   body.register_body
     div.register.container#center(align='center')
       h1 Register
@@ -12,41 +12,43 @@ html
 
       form(method='post', action='/register')
 
-        span First Name
-        br
-        input(type='text', name='firstname')
+        div.col-sm-6
+          span First Name
+          br
+          input(type='text', name='firstname')
 
-        br
+          br
 
-        span Last Name
-        br
-        input(type='text', name='lastname')
+          span Last Name
+          br
+          input(type='text', name='lastname')
 
-        br
+          br
 
-        span Email
-        br
-        input(type='email', name='email')
+          span Email
+          br
+          input(type='email', name='email')
 
-        br
+          br
 
-        span Username
-        br
-        input(type='text', name='username')
+        div.col-sm-6
+          span Username
+          br
+          input(type='text', name='username')
 
-        br
+          br
 
-        span Password
-        br
-        input(type='password', name='password1')
+          span Password
+          br
+          input(type='password', name='password1')
 
-        br
+          br
 
-        span Re-enter Password
-        br
-        input(type='password', name='password2')
+          span Re-enter Password
+          br
+          input(type='password', name='password2')
 
-        br
+          br
 
         span Color
         br

@@ -157,26 +157,6 @@ canvas {
    background-size: 100%;
 }
 
-#center {
-  position: absolute;
-  width: 100%;
-  bottom: calc(50vh - 120px);
-  height: 300px;
-
- a {
-    color: blue;
-    background: rgba( 0, 0, 0, 0 );
-  }
-
-  h1 {
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    width: 500px;
-    border-bottom: 1px solid white;
-  }
-
-}
-
 .login-form {
 
   span {
@@ -231,13 +211,17 @@ canvas {
 
   input {
 
-    width: 300px;
-    margin: 0 0 40px 0;
+    width: 400px;
+    margin: 0 0 30px 0;
     border-radius: 0;
     border: 0;
     box-shadow: 0;
     color: black;
 
+  }
+
+  input[type='color'] {
+    height: 50px;
   }
 
   textarea {
@@ -255,14 +239,27 @@ canvas {
 
   }
 
-}
+  #center {
+    position: absolute;
+    width: 100%;
+    bottom: calc(50vh - 120px);
+    height: 300px;
 
-input {
-  color: black;
-}
+   a {
+      color: blue;
+      background: rgba( 0, 0, 0, 0 );
+    }
 
-textarea {
-  color: black;
+    h1 {
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      width: 500px;
+      border-bottom: 1px solid white;
+    }
+
+  }
+
+
 }
 
 #controlMenu {
