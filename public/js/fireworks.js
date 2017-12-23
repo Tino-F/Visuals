@@ -29,7 +29,7 @@ let audioLoader = new THREE.AudioLoader();
 
 //sad.mp3 touch.mp3 Fake.wav woah.mp3
 
-audioLoader.load( 'music/sad.mp3', ( buffer ) => {
+audioLoader.load( 'music/Fake.wav', ( buffer ) => {
 	//initial audio load function
 	sound.setBuffer( buffer );
 	sound.setLoop(true);

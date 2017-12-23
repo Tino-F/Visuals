@@ -35,7 +35,7 @@ class Player {
       this.g = g;
       this.m = material;
       this.model = new THREE.Mesh( this.g, this.m );
-      this.model.scale.set( 50, 50, 50 );
+      this.model.scale.set( 30, 30, 30 );
       this.model.position.x = this.position.x;
       this.model.position.y = this.position.y;
       this.model.position.z = this.position.z;
