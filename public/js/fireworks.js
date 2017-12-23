@@ -185,6 +185,7 @@ scene.add( box );
 
 let controls = new THREE.SpaceControls( camera, {cb: move} );
 
+camera.rotation.y = 2.4
 
 function animate () {
 	AudioSpectrum.update();
