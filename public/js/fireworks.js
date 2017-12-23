@@ -6,6 +6,8 @@ let vr_choice = document.getElementById('vr');
 let loading = document.getElementById('loading');
 let progress = document.getElementById('progress');
 let acceleration = document.getElementById('acceleration');
+let song_input = document.getElementById('song_input');
+let current_song = document.getElementById('playing');
 let scene = new THREE.Scene();
 scene.background = new THREE.Color( 0x000000 );
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 200000 );
@@ -21,9 +23,8 @@ let stats = new Stats();
 document.body.append( stats.dom )
 let listener = new THREE.AudioListener();
 camera.add( listener );
-let sound = new THREE.PositionalAudio( listener );
+let sound = new THREE.Audio( listener );
 let audioLoader = new THREE.AudioLoader();
-let velocity = {x: 0, y: 0, z: 0};
 
 //sad.mp3 touch.mp3 Fake.wav woah.mp3
 
@@ -31,16 +32,15 @@ audioLoader.load( 'music/sad.mp3', ( buffer ) => {
 	//initial audio load function
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
-	sound.setRefDistance( 500 );
 	sound.setVolume(1);
   title.style.opacity = 1;
 	playing = true;
 
 	server.emit('ready', {
 		Velocity: {
-			x: velocity.x,
-			y: velocity.y,
-			z: velocity.z
+			x: 0,
+			y: 0,
+			z: 0
 		},
 		Rotation: {
 			x: camera.rotation.x,
@@ -71,28 +71,38 @@ function load_song ( url ) {
 		//initial audio load function
 		sound.setBuffer( buffer );
 		sound.setLoop(true);
-		sound.setRefDistance( 500 );
 		sound.setVolume(1);
 	  title.style.opacity = 1;
 		sound.stop();
 		sound.play();
 		playing = true;
+		current_song.innerHTML = song_input.files[0].name;
 
 	}, ( xhr ) => {
 		//load progress function
 		let perc = (xhr.loaded / xhr.total * 100);
-		let loaded = 'Loading ' + url + ': ' + Math.floor(perc) + '%';
+		let loaded = 'Loading ' + song_input.files[0].name + ': ' + Math.floor(perc) + '%';
 		console.log( loaded )
+		current_song.innerHTML = loaded;
 
 	}, ( err ) => {
 		//Error function
 
-		console.log( 'Failed to load: ' + url );
+		current_song.innerHTML = 'Failed to load: ' + song_input.files[0].name;
 		console.log( err )
 
 	});
 
 }
+
+let the_file;
+
+song_input.addEventListener('change', ( e ) => {
+
+	load_song( window.URL.createObjectURL( song_input.files[0] ) );
+	current_song.innerHTML = 'Playing: ' + song_input.files[0].name;
+
+})
 
 let analyser = new THREE.AudioAnalyser( sound, 128 );
 
@@ -170,9 +180,7 @@ document.body.appendChild( AudioSpectrum.Dom );
 let g = new THREE.CubeGeometry( 100, 100, 100 );
 let m = new THREE.MeshNormalMaterial();
 let box = new THREE.Mesh( g, m );
-box.add( sound );
 box.position.x = 500;
-velocity.z = -20;
 scene.add( box );
 
 let controls = new THREE.SpaceControls( camera, {cb: move} );

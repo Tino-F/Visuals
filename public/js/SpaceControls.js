@@ -24,57 +24,19 @@ THREE.SpaceControls = function ( camera, options ) {
   };
 
   this.camera = camera;
-  this.camera.rotation.order = 'YXZ';
+  this.camera.rotation.order = 'XYZ';
 
   //Set paramaters to class variables and set default values
   //Sensitivity, lookSensitivity, cb, and Acceleration
 
-  if ( !options ) {
+  let anon_function = () => {
 
-    this.Sensitivity = 0.8;
-    this.cb = () => {};
-    this.Acceleration = 0.0003;
-    this.maxSpeed = 0.1;
+  };
 
-  } else {
-
-    if ( !options.Sensitivity ) {
-
-      this.Sensitivity = 0.8;
-
-    } else {
-
-      this.Sensitivity = options.Sensitivity;
-
-    }
-
-    if ( !options.cb ) {
-
-      this.cb = () => {};
-
-    } else {
-
-      this.cb = options.cb;
-
-    }
-
-    if ( !options.Acceleration ) {
-
-      this.Acceleration = 0.001;
-
-    } else {
-
-      this.Acceleration = options.Acceleration;
-
-    }
-
-    if ( !options.maxSpeed ) {
-      this.maxSpeed = 1;
-    } else {
-      this.maxSpeed = options.maxSpeed;
-    }
-
-  }
+  this.Sensitivity = options.Sensitivity || 0.8;
+  this.cb = options.cb || anon_function;
+  this.Acceleration = options.Acceleration || 0.001;
+  this.maxSpeed = options.maxSpeed || 1;
 
   this.getTime = () => {
     let now = new Date();
@@ -131,8 +93,6 @@ THREE.SpaceControls = function ( camera, options ) {
 
     let moveon = true;
     let maxNegative = this.maxSpeed * -1;
-
-    console.log( 'Checking speed Vector...' );
 
     if ( ( this.velocity.x + ( directionVector.x * this.Acceleration ) ) > this.maxSpeed ) {
       moveon = false;
@@ -197,20 +157,13 @@ THREE.SpaceControls = function ( camera, options ) {
 
       let direction = this.camera.getWorldDirection();
 
-      console.log( 'Attempting to move forward' );
-      console.log( this.checkSpeed( direction ) );
-
       if( this.checkSpeed( direction ) ) {
-
-        console.log( 'You are below your maximum speed. Accelerating.' );
 
         this.velocity.x += direction.x * this.Acceleration;
         this.velocity.y += direction.y * this.Acceleration;
         this.velocity.z += direction.z * this.Acceleration;
         this.cb( { Velocity: this.velocity, startTime: this.startTime, position: camera.position, Rotation: camera.rotation });
         this.update();
-
-        console.log( this.velocity );
 
       }
 
@@ -230,6 +183,10 @@ THREE.SpaceControls = function ( camera, options ) {
     }
 
   };
+
+  let vectors = {
+    up: new THREE.Vector3( 0, 1, 0 ),
+  }
 
   this.accelerateUp = () => {
 

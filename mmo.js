@@ -190,8 +190,11 @@ exports.init = ( io ) => {
 
     s.on( 'disconnect', () => {
 
-      if ( s.handshake.session.passport )
-        onlineUsers[ username ].disconnect( io );
+      if ( s.handshake.session.passport ) {
+        if ( onlineUsers[ username ] ) {
+            onlineUsers[ username ].disconnect( io );
+        }
+      }
 
     });
 

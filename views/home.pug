@@ -14,7 +14,7 @@ html
     script(src='/socket.io/socket.io.js')
     script(src='js/math.min.js')
     script(src='js/StereoEffect.js')
-  body
+  body(ondrop='drop(event)')
     div#title(align='center')
       div
         h1 Enjoy the visuals #{user.Username}
@@ -51,6 +51,9 @@ html
       div.music
       div.settings
 
+    input(type='file')#song_input
+    label(for='song_input')#song
+      p#playing Playing: Fake Love
     //
       div#begin
         div(align='center')

@@ -1,6 +1,7 @@
 body {
   margin: 0;
   overflow: hidden;
+  font-family: sans-serif;
 }
 
 canvas {
@@ -349,6 +350,35 @@ canvas {
 
   div {
     width: 100vw;
+  }
+
+}
+
+#song_input {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+#song {
+
+  width: 18vw;
+  background: rgba( 225, 225, 225, 0.5 );
+  border: 1px solid white;
+  border-radius: 15px;
+  position: fixed;
+  right: 10px;
+  top: 10px;
+  text-align: center;
+  color: black;
+  transition: all 0.4s ease-in-out;
+
+  &:hover {
+    background: rgba( 225, 225, 225, 0 );
+    color: white;
   }
 
 }
