@@ -7,6 +7,7 @@ let loading = document.getElementById('loading');
 let progress = document.getElementById('progress');
 let acceleration = document.getElementById('acceleration');
 let song_input = document.getElementById('song_input');
+let music_selector = document.getElementById('song');
 let current_song = document.getElementById('playing');
 let scene = new THREE.Scene();
 scene.background = new THREE.Color( 0x000000 );
@@ -65,7 +66,10 @@ audioLoader.load( 'music/sad.mp3', ( buffer ) => {
 
 });
 
-function load_song ( url ) {
+function load_song ( file ) {
+
+	let songname = file.name;
+	let url = window.URL.createObjectURL( file );
 
 	audioLoader.load( url, ( buffer ) => {
 		//initial audio load function
@@ -76,33 +80,48 @@ function load_song ( url ) {
 		sound.stop();
 		sound.play();
 		playing = true;
-		current_song.innerHTML = song_input.files[0].name;
+		current_song.innerHTML = songname;
 
 	}, ( xhr ) => {
 		//load progress function
 		let perc = (xhr.loaded / xhr.total * 100);
-		let loaded = 'Loading ' + song_input.files[0].name + ': ' + Math.floor(perc) + '%';
+		let loaded = 'Loading ' + songname + ': ' + Math.floor(perc) + '%';
 		console.log( loaded )
 		current_song.innerHTML = loaded;
 
 	}, ( err ) => {
 		//Error function
 
-		current_song.innerHTML = 'Failed to load: ' + song_input.files[0].name;
+		current_song.innerHTML = 'Failed to load: ' + songname;
 		console.log( err )
 
 	});
 
 }
 
-let the_file;
-
 song_input.addEventListener('change', ( e ) => {
 
-	load_song( window.URL.createObjectURL( song_input.files[0] ) );
-	current_song.innerHTML = 'Playing: ' + song_input.files[0].name;
+	load_song( song_input.files[0] );
 
 })
+
+let the_file;
+
+document.body.addEventListener('drop', ( e ) => {
+	e.preventDefault();
+
+	let files = e.target.files || e.dataTransfer.files;
+
+	load_song( files[0] );
+});
+
+document.body.addEventListener('dragover', ( e ) => {
+	e.preventDefault();
+});
+
+document.body.addEventListener('dragend', ( e ) => {
+	e.preventDefault();
+});
 
 let analyser = new THREE.AudioAnalyser( sound, 128 );
 
@@ -185,7 +204,7 @@ scene.add( box );
 
 let controls = new THREE.SpaceControls( camera, {cb: move} );
 
-camera.rotation.y = 2.4
+camera.rotation.y = 2.4;
 
 function animate () {
 	AudioSpectrum.update();
